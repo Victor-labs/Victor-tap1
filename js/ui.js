@@ -381,10 +381,14 @@ function renderPlayerInfo(){
 function renderViewProfile(el,pic,badgePills,serverPill,myServer,scpStatus){
   var joined=G.joinedAt?new Date(G.joinedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'Unknown';
   var victorBanner=typeof buildGetVictor==='function'?buildGetVictor():'';
+  var sd=typeof statusDotHTML==='function'?statusDotHTML(G.status||'online'):'';
   el.innerHTML='<div class="pi-wrap">'
     +'<div class="pi-banner"></div>'
-    +'<div class="pi-av-row"><div class="pav-wrap" id="playerAvatarWrap">'+pic+'</div>'
-    +'<div class="pi-av-status pi-online">🟢</div></div>'
+    +'<div class="pi-av-row">'
+    +'<div class="pav-wrap-outer" onclick="if(typeof openStatusPicker===\'function\')openStatusPicker()" title="Change status">'
+    +'<div class="pav-wrap" id="playerAvatarWrap">'+pic+'</div>'
+    +'<div class="status-dot-avatar" id="profileStatusDot"></div>'
+    +'</div>'
     +'<div class="pi-name-row"><div class="pi-name">'+(G.name||'Player')+'</div>'
     +'<div class="pi-sub">'+(G.name||'victorvk').toLowerCase().replace(/\s/g,'')+'</div></div>'
     +(badgePills||serverPill?'<div class="pi-badges-row">'+badgePills+serverPill+'</div>':'')
@@ -413,6 +417,8 @@ function renderViewProfile(el,pic,badgePills,serverPill,myServer,scpStatus){
     +'</div>';
   if(typeof renderQuestsSection==='function') renderQuestsSection();
   if(typeof renderVaultTab==='function') renderVaultTab();
+  // Apply correct status dot color
+  setTimeout(function(){if(typeof applyStatusDot==='function')applyStatusDot();},50);
 }
 
 function renderEditProfile(el,pic){
@@ -554,4 +560,4 @@ function buildAboutPage() {
 function toggleInfoSec(key) {
   _infoOpen[key] = !_infoOpen[key];
   buildAboutPage();
-                               }
+      }
