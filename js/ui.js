@@ -1,5 +1,5 @@
 /* NAV */
-var PG={game:'⚡ VICTOR COIN',shop:'🛒 SHOP',factory:'🏭 FACTORY',diamonds:'💎 DIAMONDS',daily:'🎁 DAILY',miner:'🤖 AUTO MINER',boosts:'⚡ BOOSTS',enigma:'🎭 ENIGMA',ach:'🏅 ACHIEVEMENTS',ranks:'🏆 RANKS',cashout:'💸 CASH OUT',player:'👤 PLAYER',about:'ℹ️ ABOUT',contact:'📞 CONTACT'};
+var PG={game:'⚡ VICTOR COIN',shop:'🛒 SHOP',factory:'🏭 FACTORY',diamonds:'💎 DIAMONDS',daily:'🎁 DAILY',miner:'🤖 AUTO MINER',boosts:'⚡ BOOSTS',enigma:'🎭 ENIGMA',ach:'🏅 ACHIEVEMENTS',ranks:'🏆 RANKS',mall:'🛍️ MALL',stake:'📈 STAKE',servers:'🌐 SERVERS',player:'👤 PLAYER',about:'ℹ️ ABOUT',contact:'📞 CONTACT'};
 function go(id,el){
   document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('on');});
   document.querySelectorAll('.si').forEach(function(s){s.classList.remove('on');});
@@ -9,8 +9,10 @@ function go(id,el){
   closeSb();
   if(id==='ach')renderAch();
   if(id==='ranks')renderRanks();
-  if(id==='cashout')renderCO();
-  if(id==='player')renderPI();
+  if(id==='mall'){if(typeof initMall!=='undefined')initMall();if(typeof renderMall!=='undefined')renderMall();setTimeout(function(){if(typeof renderMallCosmetics==='function')renderMallCosmetics();},100);}
+  if(id==='stake'){if(typeof initStake!=='undefined')initStake();if(typeof renderStake!=='undefined')renderStake();}
+  if(id==='player'){renderPlayerInfo();return;}
+  if(id==='servers'){if(typeof renderServersPage==='function')renderServersPage();}
   if(id==='diamonds')updDia();
   if(id==='daily')updDaily();
   if(id==='miner')updMiner();
@@ -38,8 +40,27 @@ var _aiv=null,_tabOk=true,_ss=0;
 function initGame(){
   _ss=Date.now();
   checkOffline();
-  renderAll();renderAch();renderRanks();renderCO();updDaily();updMiner();
-  renderBoosts();renderEnigma();applyProfilePic();
+  renderAll();renderAch();renderRanks();updDaily();updMiner();
+  renderBoosts();renderEnigma();applyProfilePic();injectStoreBtn();
+  if(typeof initStatus==='function') initStatus();
+  if(typeof initVault==='function') initVault();
+  if(typeof initCosmetics==='function') initCosmetics();
+  if(typeof initBadgesLocal==='function') initBadgesLocal();
+  if(typeof initServers==='function') initServers();
+  if(typeof initQuests==='function') initQuests();
+  // Firebase
+  if(typeof initFirebase==='function') initFirebase();
+  if(typeof fbLoad==='function') fbLoad(G.email, function(){ renderAll(); });
+  setTimeout(function(){
+    if(typeof fbSetOnline==='function') fbSetOnline();
+    if(typeof fbListenNotifications==='function') fbListenNotifications();
+    if(!G.joinedAt){ G.joinedAt=Date.now(); sv(); }
+    if(!G.settings) { G.settings={anonymous:false,notifications:true}; sv(); }
+    if(!G.bio) G.bio='';
+    if(typeof fbSave==='function') fbSave();
+    if(typeof applyAllCosmetics==='function') applyAllCosmetics();
+    if(typeof applyStatusDot==='function') applyStatusDot();
+  }, 1500);
   if(typeof initExplore==='function') initExplore();
   var ei=document.getElementById('editName');if(ei)ei.value=G.name||'';
   startAuto();startTick();
@@ -114,6 +135,7 @@ function renderAll(){
 
 /* TAP */
 function tap(ev){
+  if(typeof questProgress==='function') questProgress('taps',1);
   var base=1+Math.floor(getTapBonus());
   if(G.en.xm.active&&Date.now()<G.en.xm.endAt)base=Math.floor(base*1.1)||1;
   G.vk+=base;G.taps++;
@@ -149,7 +171,7 @@ function startTick(){
     BOOSTS.forEach(function(b){var bs=G.bs[b.id];if(bs.active&&now>=bs.endAt){bs.active=false;ch=true;toast('⏰ '+b.name+' expired!','#ff7b35');}});
     if(G.en.xm.active&&now>=G.en.xm.endAt){G.en.xm.active=false;G.en.xm.cdEnd=now+50*3600000;ch=true;toast('🧲 XP Magnet expired! 50hr cooldown.','#b06aff');}
     if(ch){sv();renderAll();}
-    renderBoosts();renderEnigma();applyProfilePic();
+    renderBoosts();renderEnigma();applyProfilePic();injectStoreBtn();
     if(typeof tickExplore==='function') tickExplore();
   },1000);
 }
@@ -272,7 +294,7 @@ function setProfilePic(input){
   reader.onload=function(e){
     G.profilePic=e.target.result;
     sv();
-    applyProfilePic();
+    applyProfilePic();injectStoreBtn();
     toast('📷 Profile photo updated!','#30D158');
   };
   reader.readAsDataURL(input.files[0]);
@@ -290,3 +312,118 @@ function applyProfilePic(){
     emoji.style.display='block';
   }
 }
+
+/* ── STORE BUTTON INJECT ── */
+function injectStoreBtn(){
+  if(document.getElementById('storeBtnWrap')) return;
+  var gameSection=document.getElementById('pg-game');if(!gameSection) return;
+  var wrap=document.createElement('div');wrap.id='storeBtnWrap';
+  wrap.innerHTML='<div style="display:flex;justify-content:center;margin:12px 0 4px;">'
+    +'<button onclick="openStore()" class="vcstore-trigger">🛍️&nbsp; Buy VK Coins</button></div>';
+  var sbar=gameSection.querySelector('.sbar');
+  if(sbar) gameSection.insertBefore(wrap,sbar); else gameSection.appendChild(wrap);
+}
+
+/* ── PLAYER INFO ── */
+var _piEditMode=false;
+function renderPI(){ renderPlayerInfo(); }
+function renderPlayerInfo(){
+  var el=document.getElementById('pg-player');if(!el) return;
+  if(typeof initBadgesLocal==='function') initBadgesLocal();
+  if(typeof initServers==='function') initServers();
+  if(typeof initQuests==='function') initQuests();
+  var myServer=typeof getPlayerServer==='function'?getPlayerServer():null;
+  var pic=G.profilePic
+    ?'<img src="'+G.profilePic+'" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;"/>'
+    :'<span style="font-size:2.8rem;">👤</span>';
+  var badgePills=typeof renderBadgePills==='function'?renderBadgePills({badges:G.badges||[],name:G.name},5):'';
+  var serverPill=myServer?'<span class="server-badge" style="border-color:'+myServer.color+'33;color:'+myServer.color+';">'+myServer.emoji+' '+myServer.name+'</span>':'';
+  var scpStatus=typeof getScpStatus==='function'?getScpStatus():null;
+  if(_piEditMode) renderEditProfile(el,pic,badgePills,serverPill);
+  else renderViewProfile(el,pic,badgePills,serverPill,myServer,scpStatus);
+  setTimeout(function(){if(typeof applyCosmetics==='function') applyCosmetics();},100);
+}
+
+function renderViewProfile(el,pic,badgePills,serverPill,myServer,scpStatus){
+  var joined=G.joinedAt?new Date(G.joinedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'Unknown';
+  var victorBanner=typeof buildGetVictor==='function'?buildGetVictor():'';
+  el.innerHTML='<div class="pi-wrap">'
+    +'<div class="pi-banner"></div>'
+    +'<div class="pi-av-row"><div class="pav-wrap" id="playerAvatarWrap">'+pic+'</div>'
+    +'<div class="pi-av-status pi-online">🟢</div></div>'
+    +'<div class="pi-name-row"><div class="pi-name">'+(G.name||'Player')+'</div>'
+    +'<div class="pi-sub">'+(G.name||'victorvk').toLowerCase().replace(/\s/g,'')+'</div></div>'
+    +(badgePills||serverPill?'<div class="pi-badges-row">'+badgePills+serverPill+'</div>':'')
+    +(G.bio?'<div class="pi-bio"><span style="font-size:0.75rem;">💬</span> '+G.bio+'</div>':'')
+    +'<button class="pi-edit-btn" onclick="toggleEditMode(true)">✏️ Edit Profile</button>'
+    +victorBanner
+    +'<div class="pi-stats-grid">'
+    +piStat('🪙','VK Coins',fm(G.vk))
+    +piStat('💎','Diamonds',G.dia)
+    +piStat('🏆','Rank',typeof getRk==='function'?getRk().n:'—')
+    +piStat('📅','Joined',joined)
+    +piStat('👆','Total Taps',fm(G.taps||0))
+    +piStat('🏠','Homes',G.build?G.build.homes.length:0)
+    +piStat('🏅','Achievements',(G.ach||[]).filter(Boolean).length+'/69')
+    +piStat('💫','SCP Balance',G.server?(G.server.scp||0)+' SCP':'—')
+    +'</div>'
+    +(myServer&&scpStatus?'<div class="pi-scp-row">'
+      +(scpStatus.ready?'<button class="scp-btn scp-claim" onclick="claimScp();renderPlayerInfo()">💫 Collect SCP</button>'
+        :'<button class="scp-btn scp-wait" disabled>⏳ SCP in '+scpStatus.h+'h '+scpStatus.m+'m</button>')
+      +(G.server.scp>0?'<button class="scp-btn scp-exchange" onclick="exchangeScp();renderPlayerInfo()">Exchange → VK</button>':'')
+      +'</div>':'')
+    +'<div class="pi-section-title">📋 Weekly Quests</div>'
+    +'<div id="questsBody"></div>'
+    +'<div class="pi-section-title">🏛️ My Vault</div>'
+    +'<div id="vaultBody"></div>'
+    +'</div>';
+  if(typeof renderQuestsSection==='function') renderQuestsSection();
+  if(typeof renderVaultTab==='function') renderVaultTab();
+}
+
+function renderEditProfile(el,pic){
+  el.innerHTML='<div class="pi-wrap">'
+    +'<div class="pi-edit-hdr">'
+    +'<button class="pi-back-btn" onclick="toggleEditMode(false)">← Back</button>'
+    +'<div class="pi-edit-title">Edit Profile</div></div>'
+    +'<div style="display:flex;justify-content:center;margin:16px 0;">'
+    +'<div style="position:relative;display:inline-block;">'
+    +'<div class="pav-wrap pav-large" id="playerAvatarWrap">'+pic+'</div>'
+    +'<label class="pi-av-upload" for="piPicInput">📷</label>'
+    +'<input type="file" id="piPicInput" accept="image/*" style="display:none;" onchange="setProfilePic(this)"/>'
+    +'</div></div>'
+    +'<div class="pi-field"><label class="pi-field-lbl">Display Name</label>'
+    +'<input class="pi-field-inp" id="piNameInp" value="'+(G.name||'')+'" maxlength="24" placeholder="Your name"/></div>'
+    +'<div class="pi-field"><label class="pi-field-lbl">Bio <span style="color:var(--text3);font-size:0.6rem;">(max 120 chars)</span></label>'
+    +'<textarea class="pi-field-ta" id="piBioInp" maxlength="120" placeholder="Tell the world about yourself…">'+(G.bio||'')+'</textarea></div>'
+    +'<div class="pi-field"><label class="pi-field-lbl">Active Cosmetics</label>'
+    +(typeof buildEquippedCosmetics==='function'?buildEquippedCosmetics():'<div style="font-size:0.68rem;color:var(--text3);">Visit Mall to buy cosmetics</div>')
+    +'</div>'
+    +'<button class="pi-save-btn" onclick="saveProfile()">💾 Save Changes</button>'
+    +'</div>';
+  setTimeout(function(){if(typeof applyCosmetics==='function') applyCosmetics();},100);
+}
+
+function buildEquippedCosmetics(){
+  if(typeof G.cosmetics==='undefined'||!G.cosmetics) return '<div style="font-size:0.68rem;color:var(--text3);">No cosmetics equipped. Buy from Mall!</div>';
+  var parts=[];
+  if(G.cosmetics.ring){var r=typeof COSMETIC_RINGS!=='undefined'?COSMETIC_RINGS.find(function(x){return x.id===G.cosmetics.ring;}):null;if(r)parts.push('<span class="cosm-tag">💍 '+r.name+' <span onclick="unequipCosmetic(\'ring\');renderPlayerInfo()">✕</span></span>');}
+  if(G.cosmetics.frame){var f=typeof COSMETIC_FRAMES!=='undefined'?COSMETIC_FRAMES.find(function(x){return x.id===G.cosmetics.frame;}):null;if(f)parts.push('<span class="cosm-tag">🖼️ '+f.name+' <span onclick="unequipCosmetic(\'frame\');renderPlayerInfo()">✕</span></span>');}
+  if(G.cosmetics.orbiter){var o=typeof COSMETIC_ORBITERS!=='undefined'?COSMETIC_ORBITERS.find(function(x){return x.id===G.cosmetics.orbiter;}):null;if(o)parts.push('<span class="cosm-tag">✨ '+o.name+' <span onclick="unequipCosmetic(\'orbiter\');renderPlayerInfo()">✕</span></span>');}
+  return parts.length?'<div class="cosm-tags-row">'+parts.join('')+'</div>':'<div style="font-size:0.68rem;color:var(--text3);">No cosmetics equipped. <span style="color:var(--gold);cursor:pointer;" onclick="go(\'mall\',null)">Visit Mall →</span></div>';
+}
+function toggleEditMode(on){_piEditMode=!!on;renderPlayerInfo();}
+function saveProfile(){
+  var name=(document.getElementById('piNameInp')||{}).value||'';
+  var bio=(document.getElementById('piBioInp')||{}).value||'';
+  if(!name.trim()){toast('Name cannot be empty','#FF453A');return;}
+  G.name=name.trim().slice(0,24);G.bio=bio.trim().slice(0,120);
+  sv();if(typeof fbSave==='function') fbSave();
+  toast('✅ Profile saved!','#30D158');_piEditMode=false;renderPlayerInfo();
+  if(typeof questProgress==='function') questProgress('bio',1);
+}
+function initBadgesLocal(){if(!G.badges)G.badges=[];if(typeof checkBadges==='function')checkBadges();}
+function piStat(ico,label,val){
+  return '<div class="pi-stat"><div class="pi-stat-ico">'+ico+'</div><div class="pi-stat-l">'+label+'</div><div class="pi-stat-v">'+val+'</div></div>';
+}
+
