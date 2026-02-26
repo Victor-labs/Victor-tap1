@@ -18,6 +18,7 @@ function go(id,el){
   if(id==='miner')updMiner();
   if(id==='boosts')renderBoosts();
   if(id==='enigma')renderEnigma();
+  if(id==='about'){if(typeof buildAboutPage==='function')buildAboutPage();}
   renderAll();
 }
 function togSb(){var sb=document.getElementById('sb'),ov=document.getElementById('sbov');var o=sb.classList.toggle('open');ov.classList.toggle('show',o);}
@@ -29,10 +30,23 @@ function doLogin(){
   var e=(document.getElementById('lemail').value||'').trim();
   if(!n||!e){toast('Fill in all fields','#ff3d5a');return;}
   if(!e.includes('@')){toast('Invalid email','#ff3d5a');return;}
+  // Button loading state
+  var btn=document.querySelector('.lbtn');
+  if(btn){btn.disabled=true;btn.querySelector('.lbtn-txt').textContent='ENTERING...';}
   G.logins++;if(!G.name)G.name=n;if(!G.email)G.email=e;sv();
-  document.getElementById('lp').style.display='none';
-  document.getElementById('app').style.display='flex';
-  initGame();
+  // Fade out login, fade in app
+  var lp=document.getElementById('lp');
+  var app=document.getElementById('app');
+  lp.style.transition='opacity 0.6s ease';
+  lp.style.opacity='0';
+  setTimeout(function(){
+    lp.style.display='none';
+    app.style.display='flex';
+    app.style.opacity='0';
+    app.style.transition='opacity 0.5s ease';
+    setTimeout(function(){app.style.opacity='1';},30);
+    initGame();
+  },600);
 }
 
 /* INIT */
@@ -425,5 +439,96 @@ function saveProfile(){
 function initBadgesLocal(){if(!G.badges)G.badges=[];if(typeof checkBadges==='function')checkBadges();}
 function piStat(ico,label,val){
   return '<div class="pi-stat"><div class="pi-stat-ico">'+ico+'</div><div class="pi-stat-l">'+label+'</div><div class="pi-stat-v">'+val+'</div></div>';
+}
+
+/* ── MINI PROFILE POPUP ── */
+function showMiniProfile(playerData) {
+  var ex = document.getElementById('miniProfileOv');
+  if (ex) ex.remove();
+
+  var pic = playerData.profilePic
+    ? '<img src="'+playerData.profilePic+'" alt=""/>'
+    : '<span>👤</span>';
+  var name = playerData.name || 'Player';
+  var bio  = playerData.bio  || '';
+  var badges  = (typeof renderBadgePills==='function') ? renderBadgePills(playerData,4) : '';
+  var server  = playerData.server && typeof serverBadgePill==='function' ? serverBadgePill(playerData.server) : '';
+  var ntClass = playerData.vault&&playerData.vault.active&&playerData.vault.active.nametemplate
+    ? (typeof NAME_TEMPLATES!=='undefined'
+      ? (NAME_TEMPLATES.find(function(x){return x.id===playerData.vault.active.nametemplate;})||{cssClass:''}).cssClass
+      : '') : '';
+
+  var ov = document.createElement('div');
+  ov.id = 'miniProfileOv';
+  ov.className = 'mini-profile-ov';
+  ov.innerHTML = '<div class="mini-profile-card">'
+    + '<div class="mini-profile-banner"></div>'
+    + '<div class="mini-profile-av-row">'
+    + '<div class="mini-profile-av">'+(playerData.profilePic?'<img src="'+playerData.profilePic+'"/>':'<span style="font-size:1.6rem;">👤</span>')+'</div>'
+    + (typeof statusDotHTML==='function'?'<div style="margin-bottom:6px;">'+statusDotHTML(playerData.status||'online')+'</div>':'')
+    + '</div>'
+    + '<div class="mini-profile-info">'
+    + '<div class="mini-profile-name '+(ntClass?'nt-inline '+ntClass:'')+'">'+escSafe(name)+'</div>'
+    + '<div class="mini-profile-badges">'+badges+server+'</div>'
+    + (bio?'<div class="mini-profile-bio">💬 '+escSafe(bio)+'</div>':'')
+    + '<div class="mini-profile-btns">'
+    + '<button class="mini-profile-btn mini-btn-full" onclick="openFullProfile('+JSON.stringify(playerData)+');document.getElementById(\'miniProfileOv\').remove()">See Full Profile</button>'
+    + '<button class="mini-profile-btn mini-btn-close" onclick="document.getElementById(\'miniProfileOv\').remove()">Close</button>'
+    + '</div>'
+    + '</div>'
+    + '</div>';
+
+  ov.addEventListener('click',function(e){if(e.target===ov)ov.remove();});
+  document.body.appendChild(ov);
+}
+
+function escSafe(s){
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ── ABOUT PAGE — INFO SECTIONS ── */
+var _infoOpen = {};
+function buildAboutPage() {
+  var el = document.getElementById('pg-about');
+  if (!el) return;
+
+  var sections = [
+    { key:'game', ico:'🎮', title:'How to Play',
+      body:'<strong>Tap</strong> the main coin button to earn VK coins. The more you tap, the more you earn.<br/><br/><strong>VK Coins</strong> are the main currency — use them to buy upgrades in the Shop, unlock Boosts, explore maps, and more.<br/><br/><strong>Diamonds</strong> are the premium currency earned by mining, daily rewards, and weekly quests.' },
+    { key:'shop', ico:'🛒', title:'Shop & Factory',
+      body:'The <strong>Shop</strong> lets you buy Tappers — passive tools that add VK per tap automatically.<br/><br/>The <strong>Factory</strong> uses Diamonds to buy industries that generate VK every second without any tapping required.' },
+    { key:'mall', ico:'🛍️', title:'Victor Mall',
+      body:'The <strong>Mall</strong> opens from <strong>7:00 AM to 11:00 PM</strong> daily.<br/><br/>Buy <strong>Tap Boosters</strong> for temporary tap bonuses, <strong>Fonts</strong> for your name, <strong>Profile Particles</strong> that float on your profile, animated <strong>Cosmetic Rings & Frames</strong>, and <strong>Name Templates</strong> that display in chat and friends lists.<br/><br/>All Mall purchases go to your <strong>Vault</strong> — activate them anytime.' },
+    { key:'explore', ico:'🗺️', title:'Exploration',
+      body:'Visit <strong>Explore</strong> to travel across 5 unique Victor maps. Each location rewards you with artifacts and coins.<br/><br/>Artifacts are stored in your Vault and can be used to unlock hidden bonuses. Explore enough to earn the <strong>Vic.player</strong> badge.' },
+    { key:'stake', ico:'📈', title:'Staking',
+      body:'<strong>Victor Stake</strong> is a forex-style risk game. Place VK or Diamonds on BUY or SELL positions.<br/><br/>Results arrive in <strong>1–4 hours</strong>. Win chance is low — stake carefully. Your full history of wins and losses is always shown.' },
+    { key:'social', ico:'🌐', title:'Social & Friends',
+      body:'Chat in <strong>Victor Chat</strong>, search for players, send gifts, and build your friends list up to 50 players.<br/><br/><strong>Badges</strong> are earned automatically when you meet criteria — they appear beside your name on your profile.<br/><br/>Your <strong>Online Status</strong> (Online/Idle/DND/Invisible) is shown on your avatar.' },
+    { key:'servers', ico:'🌐', title:'Victor Servers',
+      body:'Join one of three servers — <strong>💓 FATE</strong>, <strong>🗡️ CSM</strong>, or <strong>♠️ LOTM</strong>.<br/><br/>Servers generate <strong>+1 SCP every 4 hours</strong>. Exchange SCP for VK coins at <strong>1 SCP = 200 VK</strong>.<br/><br/>Your server badge appears beside your name on your profile.' },
+    { key:'cosmetics', ico:'✨', title:'Cosmetics & Vault',
+      body:'Everything you buy in the Mall lands in your <strong>Vault</strong> inside Player Info.<br/><br/>You can only have <strong>one of each type active</strong> at a time — one ring, one frame, one orbiter, one font, one particle, one name template.<br/><br/>Deactivate anytime for free.' }
+  ];
+
+  var h = '<div style="padding:0 0 30px;">';
+  sections.forEach(function(s) {
+    var open = _infoOpen[s.key] !== false;
+    h += '<div class="info-section">'
+      + '<div class="info-sec-hdr" onclick="toggleInfoSec(\''+s.key+'\')">'
+      + '<span class="info-sec-ico">'+s.ico+'</span>'
+      + '<span class="info-sec-name">'+s.title+'</span>'
+      + '<span class="info-sec-arr'+(open?' open':'')+'">›</span>'
+      + '</div>'
+      + (open ? '<div class="info-sec-body">'+s.body+'</div>' : '')
+      + '</div>';
+  });
+  h += '</div>';
+  el.innerHTML = h;
+}
+
+function toggleInfoSec(key) {
+  _infoOpen[key] = _infoOpen[key] === false ? true : false;
+  buildAboutPage();
 }
 
