@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="Victor Coin"/>
 <meta name="theme-color" content="#FFD60A"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
 <title>Victor Coin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -321,50 +321,10 @@
 </div>
 
 <!-- PLAYER -->
-<div class="sec" id="pg-player">
-  <h2>👤 PLAYER INFO</h2>
-  <div class="g tc">
-    <div class="pav" id="playerAvatarWrap" onclick="document.getElementById('picInput').click()" style="cursor:pointer;position:relative;">
-      <img id="playerAvatarImg" style="display:none;width:100%;height:100%;border-radius:50%;object-fit:cover;position:absolute;inset:0;"/>
-      <span id="playerAvatarEmoji">👤</span>
-      <div style="position:absolute;bottom:0;right:0;background:var(--gold);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;border:2px solid var(--bg);">📷</div>
-    </div>
-    <input type="file" id="picInput" accept="image/*" style="display:none;" onchange="setProfilePic(this)"/>
-    <div style="font-size:0.6rem;color:var(--text3);margin-bottom:10px;">Tap avatar to change photo</div>
-    <div style="font-size:.7rem;color:var(--text2);margin-bottom:10px;" id="piName">PLAYER</div>
-    <div class="er">
-      <input class="inp" id="editName" style="margin:0;max-width:185px;" placeholder="Change username" autocomplete="off"/>
-      <button class="ebt" onclick="saveName()">SAVE</button>
-    </div>
-    <div class="pig">
-      <div class="pic"><div class="piv" id="piC">0</div><div class="pil">VK Coins</div></div>
-      <div class="pic"><div class="piv d" id="piD">0</div><div class="pil">Diamonds</div></div>
-      <div class="pic"><div class="piv" id="piR" style="font-size:.68rem;">🌱 Newbie</div><div class="pil">Rank</div></div>
-      <div class="pic"><div class="piv gr" id="piM" style="font-size:.66rem;color:var(--text3);">Not Owned</div><div class="pil">Auto Miner</div></div>
-    </div>
-    <div class="pig">
-      <div class="pic"><div class="piv" id="piT">0</div><div class="pil">Total Taps</div></div>
-      <div class="pic"><div class="piv d" id="piMn">0</div><div class="pil">Total Mined</div></div>
-    </div>
-  </div>
-</div>
+<div class="sec" id="pg-player"><div id="playerInfoContent" style="min-height:200px;display:flex;align-items:center;justify-content:center;"><div style="color:var(--text3);font-size:0.8rem;">Loading...</div></div></div>
 
 <!-- ABOUT -->
-<div class="sec" id="pg-about">
-  <h2>ℹ️ ABOUT</h2>
-  <div class="g">
-    <h3>What is Victor Coin?</h3>
-    <div class="atxt">
-      <div class="ahl"><span style="font-size:1rem;flex-shrink:0;margin-top:1px;">🪙</span><div><strong>Tap:</strong> Hit the coin for VK. Buffs and Enigma multiply each tap.</div></div>
-      <div class="ahl"><span style="font-size:1rem;flex-shrink:0;margin-top:1px;">🗺️</span><div><strong>Explore:</strong> 5 map locations, rare artifacts, Build homes, collect NPCs.</div></div>
-      <div class="ahl"><span style="font-size:1rem;flex-shrink:0;margin-top:1px;">🛒</span><div><strong>Shop:</strong> Auto-tappers earn passively while tab is open.</div></div>
-      <div class="ahl"><span style="font-size:1rem;flex-shrink:0;margin-top:1px;">🏭</span><div><strong>Factory:</strong> Diamond-funded factories with huge passive output.</div></div>
-      <div class="ahl"><span style="font-size:1rem;flex-shrink:0;margin-top:1px;">⚡</span><div><strong>Boosts:</strong> 4 temporary power-ups. Buy then activate.</div></div>
-      <div class="ahl"><span style="font-size:1rem;flex-shrink:0;margin-top:1px;">🎭</span><div><strong>Enigma:</strong> 3 locked skills — pay 1M VK each to reveal.</div></div>
-      <div class="ahl"><span style="font-size:1rem;flex-shrink:0;margin-top:1px;">💸</span><div><strong>Cash Out:</strong> Reach milestones and claim real money via VicBot.</div></div>
-    </div>
-  </div>
-</div>
+<div class="sec" id="pg-about"></div>
 
 <!-- SERVERS -->
 <div class="sec" id="pg-servers"></div>
