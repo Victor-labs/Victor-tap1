@@ -5,13 +5,15 @@
 
 /* ── OPEN SOCIAL OVERLAY ── */
 function openSocial() {
-  var ex = document.getElementById('socialOverlay');
-  if (ex) { ex.remove(); return; }
-  var ov = document.createElement('div');
-  ov.id = 'socialOverlay';
-  ov.innerHTML = buildSocialShell();
-  document.body.appendChild(ov);
-  socialNav('profile');
+  try {
+    var ex = document.getElementById('socialOverlay');
+    if (ex) { ex.remove(); return; }
+    var ov = document.createElement('div');
+    ov.id = 'socialOverlay';
+    ov.innerHTML = buildSocialShell();
+    document.body.appendChild(ov);
+    socialNav('profile');
+  } catch(e) { console.error('openSocial error:',e); }
 }
 
 function closeSocial() {
@@ -551,3 +553,4 @@ function timeAgo(date) {
   if (sec < 86400)return Math.floor(sec/3600)+'h ago';
   return Math.floor(sec/86400)+'d ago';
 }
+
