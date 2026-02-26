@@ -3006,3 +3006,48 @@ footer{background:rgba(10,10,20,0.8);border-top:1px solid rgba(255,255,255,0.06)
 }
 .info-sec-body strong{color:var(--gold);}
 
+/* ═══════════════════════════════════════
+   BADGES v2 — RARITY SYSTEM
+═══════════════════════════════════════ */
+.badge-rarity-hdr{
+  display:flex;align-items:center;gap:8px;
+  font-size:0.62rem;font-weight:800;letter-spacing:1.5px;
+  text-transform:uppercase;padding:12px 0 6px;
+  border-bottom:1px solid;margin-bottom:10px;
+}
+.badge-rarity-dot{
+  width:8px;height:8px;border-radius:50%;flex-shrink:0;
+}
+.badge-rarity-tag{
+  display:inline-block;font-size:0.52rem;font-weight:700;
+  letter-spacing:1px;text-transform:uppercase;
+  border:1px solid;border-radius:20px;padding:2px 8px;
+  margin:4px 0;
+}
+.badge-top3-tag{
+  position:absolute;top:6px;left:8px;
+  font-size:0.5rem;font-weight:800;letter-spacing:0.5px;
+  color:#FFD60A;background:rgba(255,214,10,0.12);
+  border:1px solid rgba(255,214,10,0.3);border-radius:20px;
+  padding:2px 6px;text-transform:uppercase;
+}
+
+/* Emoji-only pills on profile (small, tappable) */
+.badge-pill{
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:1rem;width:30px;height:30px;
+  border:1px solid;border-radius:50%;
+  cursor:pointer;transition:all 0.18s;
+  background:rgba(0,0,0,0.3);
+  flex-shrink:0;
+}
+.badge-pill:hover{transform:scale(1.15);}
+/* Rarity glow variants */
+.badge-pill-legendary{animation:legendaryPulse 2s ease infinite;}
+.badge-pill-epic     {animation:epicPulse 2.5s ease infinite;}
+.badge-pill-special  {animation:specialPulse 2s ease infinite;}
+@keyframes legendaryPulse{0%,100%{box-shadow:0 0 4px rgba(255,214,10,0.3);}50%{box-shadow:0 0 10px rgba(255,214,10,0.7),0 0 20px rgba(255,214,10,0.3);}}
+@keyframes epicPulse   {0%,100%{box-shadow:0 0 4px rgba(191,90,242,0.3);}50%{box-shadow:0 0 10px rgba(191,90,242,0.6);}}
+@keyframes specialPulse{0%,100%{box-shadow:0 0 4px rgba(255,110,199,0.3);}50%{box-shadow:0 0 10px rgba(255,110,199,0.6);}}
+
+.badge-card{position:relative;}
