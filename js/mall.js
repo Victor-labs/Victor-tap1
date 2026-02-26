@@ -115,8 +115,11 @@ function renderMall() {
   h += '<hr class="mall-divider"/>';
   h += '<div id="mallParticlesSection"></div>';
   h += '<hr class="mall-divider"/>';
+  h += '<div id="mallNameTemplatesSection"></div>';
+  h += '<hr class="mall-divider"/>';
   h += '<div id="mallCosmeticsSection"></div>';
   el.innerHTML = h;
+  if(typeof renderMallNameTemplates==='function') renderMallNameTemplates();
   if(typeof renderMallFonts==='function') renderMallFonts();
   if(typeof renderMallParticles==='function') renderMallParticles();
   if(typeof renderMallCosmetics==='function') renderMallCosmetics();
