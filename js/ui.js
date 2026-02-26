@@ -494,43 +494,46 @@ var _infoOpen = {};
 function buildAboutPage() {
   var el = document.getElementById('pg-about');
   if (!el) return;
-
+  el.style.padding='0';
   var sections = [
-    { key:'game', ico:'🎮', title:'How to Play',
-      body:'<strong>Tap</strong> the main coin button to earn VK coins. The more you tap, the more you earn.<br/><br/><strong>VK Coins</strong> are the main currency — use them to buy upgrades in the Shop, unlock Boosts, explore maps, and more.<br/><br/><strong>Diamonds</strong> are the premium currency earned by mining, daily rewards, and weekly quests.' },
-    { key:'shop', ico:'🛒', title:'Shop & Factory',
-      body:'The <strong>Shop</strong> lets you buy Tappers — passive tools that add VK per tap automatically.<br/><br/>The <strong>Factory</strong> uses Diamonds to buy industries that generate VK every second without any tapping required.' },
-    { key:'mall', ico:'🛍️', title:'Victor Mall',
-      body:'The <strong>Mall</strong> opens from <strong>7:00 AM to 11:00 PM</strong> daily.<br/><br/>Buy <strong>Tap Boosters</strong> for temporary tap bonuses, <strong>Fonts</strong> for your name, <strong>Profile Particles</strong> that float on your profile, animated <strong>Cosmetic Rings & Frames</strong>, and <strong>Name Templates</strong> that display in chat and friends lists.<br/><br/>All Mall purchases go to your <strong>Vault</strong> — activate them anytime.' },
-    { key:'explore', ico:'🗺️', title:'Exploration',
-      body:'Visit <strong>Explore</strong> to travel across 5 unique Victor maps. Each location rewards you with artifacts and coins.<br/><br/>Artifacts are stored in your Vault and can be used to unlock hidden bonuses. Explore enough to earn the <strong>Vic.player</strong> badge.' },
-    { key:'stake', ico:'📈', title:'Staking',
-      body:'<strong>Victor Stake</strong> is a forex-style risk game. Place VK or Diamonds on BUY or SELL positions.<br/><br/>Results arrive in <strong>1–4 hours</strong>. Win chance is low — stake carefully. Your full history of wins and losses is always shown.' },
-    { key:'social', ico:'🌐', title:'Social & Friends',
-      body:'Chat in <strong>Victor Chat</strong>, search for players, send gifts, and build your friends list up to 50 players.<br/><br/><strong>Badges</strong> are earned automatically when you meet criteria — they appear beside your name on your profile.<br/><br/>Your <strong>Online Status</strong> (Online/Idle/DND/Invisible) is shown on your avatar.' },
-    { key:'servers', ico:'🌐', title:'Victor Servers',
-      body:'Join one of three servers — <strong>💓 FATE</strong>, <strong>🗡️ CSM</strong>, or <strong>♠️ LOTM</strong>.<br/><br/>Servers generate <strong>+1 SCP every 4 hours</strong>. Exchange SCP for VK coins at <strong>1 SCP = 200 VK</strong>.<br/><br/>Your server badge appears beside your name on your profile.' },
-    { key:'cosmetics', ico:'✨', title:'Cosmetics & Vault',
-      body:'Everything you buy in the Mall lands in your <strong>Vault</strong> inside Player Info.<br/><br/>You can only have <strong>one of each type active</strong> at a time — one ring, one frame, one orbiter, one font, one particle, one name template.<br/><br/>Deactivate anytime for free.' }
+    {key:'game',    ico:'🪙', title:'Tapping & Earning',
+     body:'Tap the coin to earn VK coins. Every tap earns at least +1 VK.<br/>Buy <strong>Tappers</strong> from the Shop for passive VK per tap. Unlock <strong>Enigma skills</strong> to multiply each tap. The <strong>Auto Miner bot</strong> earns VK offline for up to 8 hours.'},
+    {key:'shop',    ico:'🛒', title:'Shop & Factory',
+     body:'<strong>Shop:</strong> Buy tap boosters. Items 1-7 cost VK, 8-9 cost Diamonds.<br/><strong>Factory:</strong> Buy with Diamonds to generate VK every second. 3 factories available.'},
+    {key:'diamonds',ico:'💎', title:'Diamonds',
+     body:'Premium currency. Earn by Mining (50K VK each), Daily Rewards, and Weekly Quests.<br/>Spend on factories, premium tappers, and Mall items.'},
+    {key:'mall',    ico:'🛍️', title:'Victor Mall',
+     body:'<strong>Fonts:</strong> Gothic, GG Sans, Sakura, Orbiton.<br/><strong>Name Templates:</strong> Dragon Ball, Sakura, Galaxy, Ice, Neon, Blood Moon — 500K VK each.<br/><strong>Profile Particles:</strong> 6 animated effects visible to others (200K-1M VK).<br/><strong>Rings, Frames, Orbiters:</strong> shown on your profile card.<br/><br/>All purchases go to your Vault in Player Info.'},
+    {key:'explore', ico:'🗺️', title:'Exploration',
+     body:'Travel 5 locations: Tomb, Docks, Haven, Citadel, Abyss. Each rewards VK and rare artifacts. Build homes and unlock NPCs.<br/>Explore 10x for Hyper Squad Bravery badge.'},
+    {key:'stake',   ico:'📈', title:'Staking',
+     body:'Risk game. Place VK or Diamonds on BUY or SELL. Results arrive in 1-4 hours. Win to double — lose and it is gone. Win 20 times for the legendary IQ Too High badge.'},
+    {key:'social',  ico:'🌐', title:'Social & Friends',
+     body:'Open Social to view profiles, search players, send friend requests, gift VK or Diamonds, chat (24h expiry), and see the leaderboard.<br/>Set Online Status (Online, Idle, DND, Invisible) from Player Info.'},
+    {key:'servers', ico:'🌐', title:'Victor Servers',
+     body:'Join FATE, CSM, or LOTM. Your server generates +1 SCP every 4 hours. Exchange SCP for VK (1 SCP = 200 VK) in Player Info.'},
+    {key:'badges',  ico:'🏷️', title:'Badges & Achievements',
+     body:'69 Achievements to unlock. Badges come in 5 rarities: Common, Rare, Epic, Legendary, Special. Your top 3 highest-rarity badges show on your profile as tappable emoji icons.'},
+    {key:'vault',   ico:'✨', title:'Cosmetics & Vault',
+     body:'Everything bought in the Mall goes to Vault in Player Info. One active per type at a time. Switching is free. Name Templates and Particles are visible to other players.'}
   ];
-
-  var h = '<div style="padding:0 0 30px;">';
+  var h = '<div style="padding:0 0 40px;">';
   sections.forEach(function(s) {
-    var open = _infoOpen[s.key] !== false;
-    h += '<div class="info-section">'
-      + '<div class="info-sec-hdr" onclick="toggleInfoSec(\''+s.key+'\')">'
-      + '<span class="info-sec-ico">'+s.ico+'</span>'
-      + '<span class="info-sec-name">'+s.title+'</span>'
-      + '<span class="info-sec-arr'+(open?' open':'')+'">›</span>'
+    var open = _infoOpen[s.key] === true;
+    var arr = open ? '›' : '›';
+    h += '<div style="border-bottom:1px solid rgba(255,255,255,0.06);">'
+      + '<div onclick="toggleInfoSec(\'' + s.key + '\')" style="display:flex;align-items:center;gap:12px;padding:15px 16px;cursor:pointer;">'
+      + '<span style="font-size:1.2rem;">' + s.ico + '</span>'
+      + '<span style="flex:1;font-size:0.82rem;font-weight:700;">' + s.title + '</span>'
+      + '<span style="color:var(--text3);font-size:1.2rem;' + (open ? 'transform:rotate(90deg);display:inline-block;' : '') + '">›</span>'
       + '</div>'
-      + (open ? '<div class="info-sec-body">'+s.body+'</div>' : '')
+      + (open ? '<div style="padding:0 16px 14px;font-size:0.72rem;color:var(--text2);line-height:1.85;">' + s.body + '</div>' : '')
       + '</div>';
   });
   h += '</div>';
   el.innerHTML = h;
 }
-
 function toggleInfoSec(key) {
-  _infoOpen[key] = _infoOpen[key] === false ? true : false;
+  _infoOpen[key] = !_infoOpen[key];
   buildAboutPage();
-}
+                                             }
