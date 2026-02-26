@@ -21,7 +21,6 @@
     G.logins++;
     document.getElementById('\x6c\x70').style.display='\x6e\x6f\x6e\x65';
     document.getElementById('\x61\x70\x70').style.display='\x66\x6c\x65\x78';
-    initGame();
+    try { initGame(); } catch(err) { console.error('autoLogin initGame error:',err); }
   }
 })();
-
