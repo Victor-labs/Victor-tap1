@@ -105,11 +105,20 @@
       <div class="sbs">PROGRESS</div>
       <div class="si" id="si-ach"     onclick="go('ach',this)"><span class="sii">🏅</span><span class="sil">Achievements</span><span class="sbbadge" id="achBadge">0/40</span></div>
       <div class="si" id="si-ranks"   onclick="go('ranks',this)"><span class="sii">🏆</span><span class="sil">Ranks</span></div>
-      <div class="si" id="si-cashout" onclick="go('cashout',this)"><span class="sii">💸</span><span class="sil">Cash Out</span></div>
+      <div class="si" id="si-mall"  onclick="go('mall',this)"><span class="sii">🛍️</span><span class="sil">Mall</span></div>
+      <div class="si" id="si-stake" onclick="go('stake',this)"><span class="sii">📈</span><span class="sil">Stake</span></div>
       <hr class="sbdiv"/>
 
+      <div class="sbs">SOCIAL</div>
+      <div class="si" id="si-social" onclick="openSocial();closeSb();" style="background:rgba(191,90,242,0.07);border:1px solid rgba(191,90,242,0.18);margin-bottom:4px;position:relative;">
+        <span class="sii">🌐</span><span class="sil" style="color:var(--purple2);font-weight:700;">Social</span>
+        <span id="notifBadge" style="position:absolute;top:6px;right:10px;background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:0.5rem;font-weight:800;display:none;align-items:center;justify-content:center;border:2px solid var(--bg);"></span>
+      </div>
+      <hr class="sbdiv"/>
       <div class="sbs">ACCOUNT</div>
       <div class="si" id="si-player"  onclick="go('player',this)"><span class="sii">👤</span><span class="sil">Player Info</span></div>
+      <div class="si" id="si-settings" onclick="openSettings();closeSb();"><span class="sii">⚙️</span><span class="sil">Settings</span></div>
+      <div class="si" id="si-servers" onclick="go('servers',this);renderServersPage()"><span class="sii">🌐</span><span class="sil">Victor Servers</span></div>
       <div class="si" id="si-about"   onclick="go('about',this)"><span class="sii">ℹ️</span><span class="sil">About</span></div>
       <div class="si" id="si-contact" onclick="go('contact',this)"><span class="sii">📞</span><span class="sil">Contact</span></div>
       <div class="sbfoot">Victor_vk © 2024<br/>All Rights Reserved</div>
@@ -297,16 +306,12 @@
   <div id="rankList"></div>
 </div>
 
-<!-- CASHOUT -->
-<div class="sec" id="pg-cashout">
-  <h2>💸 CASH OUT</h2>
-  <p class="sd">Reach the VK threshold, screenshot your balance, send to VicBot on WhatsApp.</p>
-  <div class="g gg tc" style="margin-bottom:11px;">
-    <div style="font-size:.62rem;color:var(--text3);">YOUR BALANCE</div>
-    <div style="font-size:1.35rem;font-weight:900;color:var(--gold);margin:4px 0;" id="coBal">0 VK</div>
-    <div style="font-size:.65rem;color:var(--text3);" id="coRank"></div>
-  </div>
-  <div class="cog" id="coGrid"></div>
+<!-- MALL -->
+<div class="sec" id="pg-mall">
+</div>
+
+<!-- STAKE -->
+<div class="sec" id="pg-stake">
 </div>
 
 <!-- PLAYER -->
@@ -354,6 +359,9 @@
     </div>
   </div>
 </div>
+
+<!-- SERVERS -->
+<div class="sec" id="pg-servers"></div>
 
 <!-- CONTACT -->
 <div class="sec" id="pg-contact">
@@ -408,6 +416,10 @@
 <!-- ═══════════════════════════════
      SCRIPTS — ORDER MATTERS
 ═══════════════════════════════ -->
+<!-- Firebase SDK (must load first) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase.js"></script>
 <script src="js/config.js"></script>
 <script src="js/state.js"></script>
 <script src="js/ui.js"></script>
@@ -415,7 +427,17 @@
 <script src="js/enigma.js"></script>
 <script src="js/util.js"></script>
 <script src="js/main.js"></script>
+<script src="js/cosmetics.js"></script>
+<script src="js/badges.js"></script>
+<script src="js/quests.js"></script>
+<script src="js/servers.js"></script>
+<script src="js/vault.js"></script>
+<script src="js/status.js"></script>
+<script src="js/mall.js"></script>
+<script src="js/stake.js"></script>
 <script src="js/explore.js"></script>
+<script src="js/payment.js"></script>
+<script src="js/social.js"></script>
 
 <!-- Login page particle canvas -->
 <script>
