@@ -1,5 +1,5 @@
 /* BOOSTS */
-function renderBoosts(){
+function renderBoosts(){try{
   var now=Date.now();
   BOOSTS.forEach(function(b,i){
     var bs=G.bs[b.id];
@@ -23,6 +23,7 @@ function renderBoosts(){
       else stat.textContent='';
     }
   });
+}catch(e){console.warn('renderBoosts:',e);}
 }
 function buyBoost(id){
   var b=BOOSTS.find(function(x){return x.id===id;});if(!b)return;
