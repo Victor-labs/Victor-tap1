@@ -54,35 +54,48 @@ function doLogin(){
 /* INIT */
 var _aiv=null,_tabOk=true,_ss=0;
 function initGame(){
-  _ss=Date.now();
-  checkOffline();
-  renderAll();renderAch();renderRanks();updDaily();updMiner();
-  renderBoosts();renderEnigma();applyProfilePic();injectStoreBtn();
-  if(typeof initStatus==='function') initStatus();
-  if(typeof initVault==='function') initVault();
-  if(typeof initCosmetics==='function') initCosmetics();
-  if(typeof initBadgesLocal==='function') initBadgesLocal();
-  if(typeof initServers==='function') initServers();
-  if(typeof initQuests==='function') initQuests();
-  // Firebase
-  if(typeof initFirebase==='function') initFirebase();
-  if(typeof fbLoad==='function') fbLoad(G.email, function(){ renderAll(); });
-  setTimeout(function(){
-    if(typeof fbSetOnline==='function') fbSetOnline();
-    if(typeof fbListenNotifications==='function') fbListenNotifications();
-    if(!G.joinedAt){ G.joinedAt=Date.now(); sv(); }
-    if(!G.settings) { G.settings={anonymous:false,notifications:true}; sv(); }
-    if(!G.bio) G.bio='';
-    if(typeof fbSave==='function') fbSave();
-    if(typeof applyAllCosmetics==='function') applyAllCosmetics();
-    if(typeof applyStatusDot==='function') applyStatusDot();
-  }, 1500);
-  if(typeof initExplore==='function') initExplore();
-  var ei=document.getElementById('editName');if(ei)ei.value=G.name||'';
-  startAuto();startTick();
-  document.addEventListener('visibilitychange',function(){
-    _tabOk=!document.hidden;if(_tabOk){G.lastActive=Date.now();sv();}
-  });
+  try{
+    _ss=Date.now();
+    checkOffline();
+    // Safe renders
+    try{renderAll();}catch(e){console.warn('renderAll:',e);}
+    try{renderAch();}catch(e){console.warn('renderAch:',e);}
+    try{renderRanks();}catch(e){console.warn('renderRanks:',e);}
+    try{updDaily();}catch(e){console.warn('updDaily:',e);}
+    try{updMiner();}catch(e){console.warn('updMiner:',e);}
+    try{renderBoosts();}catch(e){console.warn('renderBoosts:',e);}
+    try{renderEnigma();}catch(e){console.warn('renderEnigma:',e);}
+    try{applyProfilePic();}catch(e){}
+    try{if(typeof injectStoreBtn==='function')injectStoreBtn();}catch(e){}
+    // Init subsystems
+    if(typeof initStatus==='function')   try{initStatus();}catch(e){}
+    if(typeof initVault==='function')    try{initVault();}catch(e){}
+    if(typeof initCosmetics==='function')try{initCosmetics();}catch(e){}
+    if(typeof initBadges==='function')   try{initBadges();}catch(e){}
+    if(typeof initServers==='function')  try{initServers();}catch(e){}
+    if(typeof initQuests==='function')   try{initQuests();}catch(e){}
+    if(typeof initExplore==='function')  try{initExplore();}catch(e){}
+    // Firebase
+    if(typeof initFirebase==='function') try{initFirebase();}catch(e){}
+    if(typeof fbLoad==='function') fbLoad(G.email, function(){try{renderAll();}catch(e){}});
+    setTimeout(function(){
+      try{
+        if(typeof fbSetOnline==='function') fbSetOnline();
+        if(typeof fbListenNotifications==='function') fbListenNotifications();
+        if(!G.joinedAt) G.joinedAt=Date.now();
+        if(!G.bio) G.bio='';
+        sv();
+        if(typeof fbSave==='function') fbSave();
+        if(typeof applyAllCosmetics==='function') applyAllCosmetics();
+        if(typeof applyStatusDot==='function') applyStatusDot();
+      }catch(e){console.warn('initGame delayed:',e);}
+    },1500);
+    var ei=document.getElementById('editName');if(ei)ei.value=G.name||'';
+    startAuto();startTick();
+    document.addEventListener('visibilitychange',function(){
+      _tabOk=!document.hidden;if(_tabOk){G.lastActive=Date.now();sv();}
+    });
+  }catch(e){console.error('initGame crash:',e);}
 }
 function checkOffline(){
   if(G.bot&&G.lastActive){
@@ -116,14 +129,16 @@ function getAR(){
 }
 function getTapBonus(){
   var b=0,now=Date.now();
-  if(G.en.bc.active)b+=2;
-  if(G.bs.sr.active&&now<G.bs.sr.endAt)b+=5;
+  if(G.en&&G.en.bc&&G.en.bc.active)b+=2;
+  if(G.bs&&G.bs.sr&&G.bs.sr.active&&now<G.bs.sr.endAt)b+=5;
   if(G.en.xm.active&&now<G.en.xm.endAt)b+=0.1; // 10% extra handled in tap()
   return b;
 }
 
 /* RENDER ALL */
 function renderAll(){
+  try{
+  if(!G||!G.en||!G.bs) return;
   var c=Math.floor(G.vk),d=Math.floor(G.dia);
   st('cd',fm(c));st('dd',fm(d));st('nvk',fm(c)+' VK');st('ndia',fm(d)+'💎');
   st('tapD',fm(G.taps));st('loginD',G.logins);st('mineD',fm(G.mined));
@@ -147,13 +162,15 @@ function renderAll(){
   var bc=document.getElementById('buffCard'),bl=document.getElementById('buffList');
   if(lines.length>0){if(bc)bc.style.display='';if(bl)bl.innerHTML=lines.join('<br/>');}
   else{if(bc)bc.style.display='none';}
+  }catch(e){console.warn('renderAll error:',e);}
 }
 
 /* TAP */
 function tap(ev){
+  try{
   if(typeof questProgress==='function') questProgress('taps',1);
   var base=1+Math.floor(getTapBonus());
-  if(G.en.xm.active&&Date.now()<G.en.xm.endAt)base=Math.floor(base*1.1)||1;
+  if(G.en&&G.en.xm&&G.en.xm.active&&Date.now()<G.en.xm.endAt)base=Math.floor(base*1.1)||1;
   G.vk+=base;G.taps++;
   var h=new Date().getHours();
   if(h===1&&!G.ach[13]){G.ach[13]=true;toast('🦉 Night Owl unlocked!','#ffd700');}
@@ -166,6 +183,7 @@ function tap(ev){
     var rc=btn.getBoundingClientRect();fl.style.left=(rc.left+rc.width/2-14)+'px';fl.style.top=(rc.top+rc.height*.3)+'px';
     document.body.appendChild(fl);setTimeout(function(){fl.remove();},730);
   }
+  }catch(e){console.error('tap error:',e);}
 }
 
 /* AUTO */
@@ -536,4 +554,4 @@ function buildAboutPage() {
 function toggleInfoSec(key) {
   _infoOpen[key] = !_infoOpen[key];
   buildAboutPage();
-                                             }
+                               }
