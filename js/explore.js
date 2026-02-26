@@ -123,9 +123,13 @@ function isLocUnlocked(locId){
 
 /* ── OVERLAY NAV ── */
 function openExplore(){
-  initExplore();
-  document.getElementById('exploreOverlay').style.display='flex';
-  exNav('explore');
+  try{
+    initExplore();
+    var ov=document.getElementById('exploreOverlay');
+    if(!ov){console.error('exploreOverlay not found');return;}
+    ov.style.display='flex';
+    exNav('explore');
+  }catch(e){console.error('openExplore error:',e);}
 }
 function closeExplore(){
   document.getElementById('exploreOverlay').style.display='none';
