@@ -16,7 +16,9 @@ var FB_CFG = {
 /* Global Firebase refs */
 var _fbApp = null;
 var _db    = null;
+var _auth  = null;   // Firebase Anonymous Auth
 var _fbReady = false;
+var _fbUid   = null; // Authenticated user UID
 var _fbQueue = []; // functions waiting for FB to be ready
 
 function fbReady(fn) {
@@ -35,11 +37,40 @@ function initFirebase() {
     } else {
       _fbApp = firebase.app();
     }
-    _db = firebase.firestore();
-    _fbReady = true;
-    _fbQueue.forEach(function(fn){ try{fn();}catch(e){} });
-    _fbQueue = [];
-    console.log('✅ Firebase connected');
+    _db   = firebase.firestore();
+    _auth = firebase.auth();
+
+    // ── Anonymous Auth ──────────────────────────────
+    // Signs in silently — no UI, no password.
+    // Gives each device a real UID that Firestore rules can check.
+    _auth.onAuthStateChanged(function(user) {
+      if (user) {
+        _fbUid   = user.uid;
+        _fbReady = true;
+        _fbQueue.forEach(function(fn){ try{fn();}catch(e){} });
+        _fbQueue = [];
+        console.log('✅ Firebase connected, uid:', _fbUid);
+      }
+    });
+
+    // Sign in anonymously if not already
+    if (!_auth.currentUser) {
+      _auth.signInAnonymously()
+        .catch(function(e){ 
+          // Fallback: still allow app to work without auth
+          console.warn('Auth warning:', e.message);
+          _fbReady = true;
+          _fbQueue.forEach(function(fn){ try{fn();}catch(e2){} });
+          _fbQueue = [];
+        });
+    } else {
+      _fbUid   = _auth.currentUser.uid;
+      _fbReady = true;
+      _fbQueue.forEach(function(fn){ try{fn();}catch(e){} });
+      _fbQueue = [];
+    }
+
+    console.log('✅ Firebase initialized');
   } catch(e) {
     console.error('Firebase init error:', e);
   }
@@ -90,7 +121,9 @@ function buildPlayerData() {
     bio:          G.bio || '',
     anonymous:    G.settings ? !!G.settings.anonymous : false,
     lastSeen:     firebase.firestore.FieldValue.serverTimestamp(),
-    joinedAt:     G.joinedAt || Date.now()
+    joinedAt:     G.joinedAt || Date.now(),
+    uid:          _fbUid || null,
+    nameLower:    (G.name||'').toLowerCase()
   };
 }
 
