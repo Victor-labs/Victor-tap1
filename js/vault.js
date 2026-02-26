@@ -11,7 +11,8 @@ var VAULT_CATS = {
   frame:    { label:'🖼️ Frames',     key:'frame'   },
   orbiter:  { label:'✨ Orbiters',   key:'orbiter' },
   font:     { label:'🔤 Fonts',      key:'font'    },
-  particle: { label:'🌟 Particles',  key:'particle'}
+  particle:     { label:'🌟 Particles',     key:'particle'},
+  nametemplate: { label:'🎴 Name Templates', key:'nametemplate'}
 };
 
 function initVault() {
@@ -86,6 +87,7 @@ function getItemCat(id) {
   if (typeof COSMETIC_ORBITERS !== 'undefined' && COSMETIC_ORBITERS.find(function(x){return x.id===id;})) return 'orbiter';
   if (typeof MALL_FONTS        !== 'undefined' && MALL_FONTS.find(function(x){return x.id===id;}))        return 'font';
   if (typeof MALL_PARTICLES    !== 'undefined' && MALL_PARTICLES.find(function(x){return x.id===id;}))    return 'particle';
+  if (typeof NAME_TEMPLATES    !== 'undefined' && NAME_TEMPLATES.find(function(x){return x.id===id;}))    return 'nametemplate';
   return null;
 }
 
@@ -97,6 +99,7 @@ function getItemMeta(id) {
   if (typeof COSMETIC_ORBITERS !== 'undefined') lists = lists.concat(COSMETIC_ORBITERS);
   if (typeof MALL_FONTS        !== 'undefined') lists = lists.concat(MALL_FONTS);
   if (typeof MALL_PARTICLES    !== 'undefined') lists = lists.concat(MALL_PARTICLES);
+  if (typeof NAME_TEMPLATES    !== 'undefined') lists = lists.concat(NAME_TEMPLATES);
   return lists.find(function(x){ return x.id===id; }) || null;
 }
 
