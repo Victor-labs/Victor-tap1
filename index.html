@@ -2,6 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
+<link rel="manifest" href="manifest.json"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Victor Coin"/>
+<meta name="theme-color" content="#FFD60A"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
 <title>Victor Coin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -48,8 +54,8 @@
       <div class="lcard-glow"></div>
       <div class="lcard-inner">
         <div class="lcard-title">ENTER THE REALM</div>
-        <input class="linp" id="lname"  placeholder="Your Name"      type="text"  autocomplete="off"/>
-        <input class="linp" id="lemail" placeholder="Email Address"  type="email" autocomplete="off"/>
+        <input class="linp" id="lname"  placeholder="Your Name"      type="text"  autocomplete="off" onkeydown="if(event.key==='Enter')document.getElementById('lemail').focus()"/>
+        <input class="linp" id="lemail" placeholder="Email Address"  type="email" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()"/>
         <button class="lbtn" onclick="doLogin()">
           <span class="lbtn-orn">❖</span>
           <span class="lbtn-txt">BEGIN JOURNEY</span>
@@ -419,6 +425,7 @@
 <!-- Firebase SDK (must load first) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="js/firebase.js"></script>
 <script src="js/config.js"></script>
 <script src="js/state.js"></script>
@@ -431,7 +438,9 @@
 <script src="js/badges.js"></script>
 <script src="js/quests.js"></script>
 <script src="js/servers.js"></script>
+<script src="js/nametemplates.js"></script>
 <script src="js/vault.js"></script>
+<script src="js/pwa.js"></script>
 <script src="js/status.js"></script>
 <script src="js/mall.js"></script>
 <script src="js/stake.js"></script>
