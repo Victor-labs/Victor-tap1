@@ -1,5 +1,5 @@
 /* ENIGMA */
-function renderEnigma(){
+function renderEnigma(){try{
   var now=Date.now();
   // Skill 0 - Buff Control
   var bc=G.en.bc;
@@ -29,6 +29,7 @@ function renderEnigma(){
     else if(onCd)t2='<span class="tcd">⏳ Cooldown: '+fmT(Math.ceil((xm.cdEnd-now)/1000))+'</span>';
     sth('et2',t2);
   }
+}catch(e){console.warn('renderEnigma:',e);}
 }
 function unlockE(i){
   if(G.vk<1000000){toast('Need 1,000,000 VK','#ff3d5a');return;}
