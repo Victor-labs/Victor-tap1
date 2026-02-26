@@ -26,30 +26,28 @@ function closeSb(){document.getElementById('sb').classList.remove('open');docume
 
 /* LOGIN */
 function doLogin(){
-  var n=(document.getElementById('lname').value||'').trim();
-  var e=(document.getElementById('lemail').value||'').trim();
-  if(!n||!e){toast('Fill in all fields','#ff3d5a');return;}
-  if(!e.includes('@')){toast('Invalid email','#ff3d5a');return;}
-
-  // Save data immediately
-  G.logins++;
-  if(!G.name)  G.name  = n;
-  if(!G.email) G.email = e;
-  sv();
-
-  // Switch screens — no opacity games, just direct DOM swap
-  var lp  = document.getElementById('lp');
-  var app = document.getElementById('app');
-
-  if(lp)  lp.style.display  = 'none';
-  if(app) app.style.display = 'flex';
-
-  // Boot the game
   try {
+    var n=(document.getElementById('lname').value||'').trim();
+    var e=(document.getElementById('lemail').value||'').trim();
+    if(!n||!e){ alert('Please fill in your name and email.'); return; }
+    if(e.indexOf('@')===-1){ alert('Please enter a valid email address.'); return; }
+
+    G.logins = (G.logins||0) + 1;
+    if(!G.name)  G.name  = n;
+    if(!G.email) G.email = e;
+    sv();
+
+    document.getElementById('lp').style.display  = 'none';
+    document.getElementById('app').style.display = 'flex';
+
     initGame();
   } catch(err) {
-    console.error('initGame error:', err);
-    // Even if something fails, keep the app visible
+    console.error('doLogin error:', err);
+    // Hard fallback — force show app anyway
+    var lp=document.getElementById('lp');
+    var app=document.getElementById('app');
+    if(lp)  lp.style.display='none';
+    if(app) app.style.display='flex';
   }
 }
 
