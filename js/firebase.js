@@ -123,7 +123,14 @@ function buildPlayerData() {
     lastSeen:     firebase.firestore.FieldValue.serverTimestamp(),
     joinedAt:     G.joinedAt || Date.now(),
     uid:          _fbUid || null,
-    nameLower:    (G.name||'').toLowerCase()
+    nameLower:    (G.name||'').toLowerCase(),
+    bioChanges:   G.bioChanges||0,
+    giftCount:    G.giftCount||0,
+    badges:       G.badges||[],
+    status:       G.status||'online',
+    server:       G.server?(G.server.id||null):null,
+    vault:        G.vault||{items:[],active:{}},
+    cosmetics:    G.cosmetics||{}
   };
 }
 
@@ -248,7 +255,9 @@ function fbSendGift(toName, type, amount, callback) {
         // Deduct from sender
         if (type === 'vk')       G.vk  -= amount;
         if (type === 'diamonds') G.dia -= amount;
+        G.giftCount=(G.giftCount||0)+1;
         sv(); renderAll();
+        if(typeof checkBadges==='function') checkBadges();
         var senderRef = _db.collection('players').doc(playerDocId(G.email));
         var update = type === 'vk' ? {vk: G.vk} : {diamonds: G.dia};
         batch.update(senderRef, update);
@@ -496,4 +505,3 @@ document.addEventListener('visibilitychange', function(){
   else fbSetOnline();
 });
 window.addEventListener('beforeunload', fbSetOffline);
-
