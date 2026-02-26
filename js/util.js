@@ -1,21 +1,111 @@
-/* ACHIEVEMENTS */
+/* ACHIEVEMENTS — collapsible categories + rewards */
 function checkAch(){
+  if(!ACHS||!G.ach) return;
   var ch=false;
-  for(var i=0;i<ACHS.length;i++){if(!G.ach[i]&&ACHS[i].f(G)){G.ach[i]=true;ch=true;toast('🏅 '+ACHS[i].n+' unlocked!','#ffd700');}}
-  if(ch){sv();var ag=document.getElementById('achGrid');if(ag)renderAch();st('achBadge',G.ach.filter(Boolean).length+'/30');st('achProg',G.ach.filter(Boolean).length+'/30');}
-}
-function renderAch(){
-  var g=document.getElementById('achGrid');if(!g)return;
-  var h='';
   for(var i=0;i<ACHS.length;i++){
-    var a=ACHS[i],u=G.ach[i];
-    h+='<div class="ac '+(u?'ul':'')+'">'
-      +'<span class="ai">'+(u?a.e:'🔒')+'</span>'
-      +'<div class="an">'+a.n+'</div>'
-      +(u?'<div class="acr">'+a.c+'</div>':'')
-      +'</div>';
+    if(!G.ach[i]&&ACHS[i].f(G)){
+      G.ach[i]=true; ch=true;
+      var a=ACHS[i];
+      // Reward achievements
+      if(a.reward){
+        if(a.reward.vk){G.vk+=a.reward.vk;}
+        if(a.reward.dia){G.dia+=a.reward.dia;}
+      }
+      // Achievement notification banner
+      (function(ach,hasReward,rewardVk){
+        setTimeout(function(){
+          var ov=document.createElement('div');
+          ov.className='ach-notif';
+          ov.innerHTML='<div class="ach-notif-inner">'
+            +'<span style="font-size:1.5rem;">'+ach.e+'</span>'
+            +'<div style="flex:1">'
+            +'<div style="font-size:0.55rem;color:var(--gold);letter-spacing:1.5px;font-weight:700;">🏅 ACHIEVEMENT UNLOCKED</div>'
+            +'<div style="font-size:0.75rem;font-weight:700;margin-top:1px;">'+ach.n+'</div>'
+            +(hasReward?'<div style="font-size:0.6rem;color:var(--gold);">🎁 +'+fm(rewardVk)+' VK reward!</div>':'')
+            +'</div></div>';
+          document.body.appendChild(ov);
+          setTimeout(function(){ov.classList.add('ach-notif-out');setTimeout(function(){ov.remove();},500);},3800);
+        },300);
+      })(a, !!(a.reward&&a.reward.vk), a.reward?a.reward.vk:0);
+    }
   }
-  g.innerHTML=h;
+  if(ch){
+    sv();
+    renderAch();
+    var cnt=G.ach.filter(Boolean).length;
+    st('achBadge',cnt+'/'+ACHS.length);
+    st('achProg',cnt+'/'+ACHS.length);
+  }
+}
+
+function renderAch(){
+  var el=document.getElementById('achGrid');
+  if(!el) return;
+  var done=G.ach.filter(Boolean).length;
+  st('achBadge',done+'/'+ACHS.length);
+  st('achProg', done+'/'+ACHS.length);
+
+  if(typeof ACH_CATS==='undefined'){renderAchFlat(el);return;}
+  if(!window._achOpen) window._achOpen={};
+
+  var h='';
+  ACH_CATS.forEach(function(cat){
+    var catAchs=ACHS.filter(function(a){return cat.ids.indexOf(a.n)!==-1;});
+    if(!catAchs.length) return;
+    var catDone=catAchs.filter(function(a){
+      var idx=ACHS.indexOf(a); return idx>=0&&G.ach[idx];
+    }).length;
+    var open=window._achOpen[cat.key]!==false;
+    h+='<div class="ach-cat">'
+      +'<div class="ach-cat-hdr" onclick="toggleAchCat(\''+cat.key+'\')">'
+      +'<div class="ach-cat-left">'
+      +'<span class="ach-cat-ico">'+cat.emoji+'</span>'
+      +'<span class="ach-cat-name">'+cat.label+'</span>'
+      +'</div>'
+      +'<div class="ach-cat-right">'
+      +'<span class="ach-cat-cnt">'+catDone+'/'+catAchs.length+'</span>'
+      +'<span class="ach-cat-arr'+(open?' ach-arr-open':'')+'">›</span>'
+      +'</div>'
+      +'</div>';
+    if(open){
+      h+='<div class="ach-cat-body"><div class="achg">';
+      catAchs.forEach(function(a){
+        var idx=ACHS.indexOf(a);
+        var earned=idx>=0&&G.ach[idx];
+        h+='<div class="achc '+(earned?'ace':'acl')+'">'
+          +'<div class="ach-ico-big">'+(earned?a.e:'🔒')+'</div>'
+          +'<div class="acn">'+a.n+'</div>'
+          +'<div class="acc">'+a.c+'</div>'
+          +(earned?'<div class="acbadge">✓</div>':'')
+          +(a.reward&&a.reward.vk?'<div class="ach-reward">🎁 +'+fm(a.reward.vk)+' VK</div>':'')
+          +'</div>';
+      });
+      h+='</div></div>';
+    }
+    h+='</div>';
+  });
+  el.innerHTML=h;
+}
+
+function toggleAchCat(key){
+  if(!window._achOpen) window._achOpen={};
+  window._achOpen[key]=window._achOpen[key]===false;
+  renderAch();
+}
+
+function renderAchFlat(el){
+  var h='<div class="achg">';
+  ACHS.forEach(function(a,i){
+    var earned=G.ach[i];
+    h+='<div class="achc '+(earned?'ace':'acl')+'">'
+      +'<div class="ach-ico-big">'+(earned?a.e:'🔒')+'</div>'
+      +'<div class="acn">'+a.n+'</div>'
+      +'<div class="acc">'+a.c+'</div>'
+      +(earned?'<div class="acbadge">✓</div>':'')
+      +'</div>';
+  });
+  h+='</div>';
+  el.innerHTML=h;
 }
 
 /* RANKS */
@@ -37,18 +127,40 @@ function renderRanks(){
   list.innerHTML=h;
 }
 
-/* PLAYER */
+/* PLAYER INFO */
 function renderPI(){
   st('piC',fm(G.vk));st('piD',fm(G.dia));st('piR',getRk().n);
-  st('piT',fm(G.taps));st('piMn',fm(G.mined));st('piName',(G.name||'PLAYER').toUpperCase());
-  var m=document.getElementById('piM');if(m){m.textContent=G.bot?'✅ Owned':'Not Owned';m.style.color=G.bot?'var(--gr)':'var(--dim2)';}
+  st('piT',fm(G.taps));st('piMn',fm(G.mined));
+  st('piName',(G.name||'PLAYER').toUpperCase());
+  var m=document.getElementById('piM');
+  if(m){m.textContent=G.bot?'✅ Owned':'Not Owned';m.style.color=G.bot?'var(--green)':'var(--text3)';}
   var ei=document.getElementById('editName');if(ei)ei.value=G.name||'';
 }
-function saveName(){var v=(document.getElementById('editName').value||'').trim();if(!v){toast('Name empty','#ff3d5a');return;}G.name=v;sv();toast('✅ Name updated!','#00e5a0');st('piName',v.toUpperCase());}
+function saveName(){
+  var v=(document.getElementById('editName').value||'').trim();
+  if(!v){toast('Name empty','#FF453A');return;}
+  G.name=v;sv();toast('✅ Name updated!','#30D158');
+  st('piName',v.toUpperCase());
+}
 
 /* TOAST */
 var _tt;
-function toast(msg,c){var t=document.getElementById('toast');t.textContent=msg;t.style.color=c||'var(--text)';t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('show');},2700);}
+function toast(msg,c){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.style.color=c||'var(--text)';
+  t.classList.add('show');clearTimeout(_tt);
+  _tt=setTimeout(function(){t.classList.remove('show');},2700);
+}
 
-/* PERIODIC */
-setInterval(function(){checkAch();if(G.bot)G.lastActive=Date.now();sv();renderAll();renderCO();updDaily();},5000);
+/* PERIODIC TICK */
+setInterval(function(){
+  try{
+    if(!G||!G.email) return; // don't run before login
+    checkAch();
+    if(G.bot) G.lastActive=Date.now();
+    if(typeof tickMall==='function') tickMall();
+    sv();
+    if(typeof renderAll==='function') renderAll();
+    if(typeof updDaily==='function') updDaily();
+  }catch(e){ console.warn('tick error:',e); }
+},5000);
