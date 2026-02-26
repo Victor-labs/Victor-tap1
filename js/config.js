@@ -86,5 +86,62 @@ var ACHS=[
   {n:'Vic.Builder',e:'🏗️',c:'Own 3 homes',f:function(g){return g.build&&g.build.homes.length>=3;}},
   {n:'Safe House',e:'🛡️',c:'Have 1 NPC in your home',f:function(g){return g.build&&g.build.homes.some(function(h){return h.npcs>=1;});}},
   {n:'Rainy Days',e:'🌧️',c:'Get robbed once',f:function(g){return g.build&&g.build.wasRobbed;}},
-  {n:'Mod.Vic',e:'🔐',c:'Buy security for a home',f:function(g){return g.build&&g.build.homes.some(function(h){return h.hasecurity;});}}
+  {n:'Mod.Vic',e:'🔐',c:'Buy security for a home',f:function(g){return g.build&&g.build.homes.some(function(h){return h.hasecurity;});}},
+  {n:'Wormhole',              e:'🌀', c:'Explore Vic Haven 2 times',          f:function(g){return g.ex&&(g.ex.locVisits[2]||0)>=2;}},
+  {n:'The hunt begins',       e:'🔍', c:'Start your first exploration',         f:function(g){return g.ex&&g.ex.totalExplores>=1;}},
+  {n:'My mood',               e:'😎', c:'Add something to your bio',             f:function(g){return !!(g.bio&&g.bio.length>0);}},
+  {n:'master staker',         e:'📈', c:'Stake up a million VK coins total',    f:function(g){return g.stake&&g.stake.totalStaked>=1000000;}},
+  {n:'Vic.player',            e:'🗺️', c:'Explore all 5 map locations',           f:function(g){return g.ex&&g.ex.locVisits&&g.ex.locVisits.every(function(v){return v>=1;});}},
+  {n:'No stopping me',        e:'🏆', c:'Enter leaderboard 4 times',            f:function(g){return g.lbViews&&g.lbViews>=4;}},
+  {n:'Light bringer',         e:'✨', c:'Earn 4 artifacts',                      f:function(g){return g.ex&&g.ex.vault&&g.ex.vault.length>=4;}},
+  {n:'Enigmared',             e:'🎭', c:'Own 1 Enigma skill',                   f:function(g){return g.enig&&g.enig.filter(function(e){return e.u;}).length>=1;}},
+  {n:'Nightmares',            e:'💀', c:'Lose 4 times in staking',              f:function(g){return g.stake&&g.stake.losses>=4;}},
+  {n:'Welcome to tapping society',e:'🪙',c:'Own 20,000 VK coins',             f:function(g){return g.vk>=20000;}},
+  {n:'Connect to the world I',e:'👥', c:'Have 5 friends',                       f:function(g){return g.friendCount&&g.friendCount>=5;}},
+  {n:'Connect to the world II',e:'🤝',c:'Have 15 friends',                     f:function(g){return g.friendCount&&g.friendCount>=15;}},
+  {n:'Connect to the world III',e:'🌍',c:'Have 40 friends',                    f:function(g){return g.friendCount&&g.friendCount>=40;},reward:{vk:50000}},
+  {n:'Lone star',             e:'⭐', c:'Get 5 likes on your profile',          f:function(g){return g.likes&&g.likes>=5;}},
+  {n:'Superstar',             e:'🌟', c:'Get 100 likes on your profile',        f:function(g){return g.likes&&g.likes>=100;}},
+  {n:'Vic loves malls',       e:'🛍️', c:'Buy all Mall items before it closes',  f:function(g){return g.mall&&g.mall.boughtAll;}},
+  {n:'Staking like a pro',    e:'💹', c:'Win 10 stakes',                        f:function(g){return g.stake&&g.stake.wins>=10;}},
+  {n:'Enigmatic',             e:'🔮', c:'Own 2 Enigma skills',                  f:function(g){return g.enig&&g.enig.filter(function(e){return e.u;}).length>=2;}},
+  {n:'Bot orders',            e:'🤖', c:'Buy the Auto Miner Bot',               f:function(g){return g.bot;}},
+  {n:'All roads are Vic roads',e:'🛣️',c:'Explore 5 times',                     f:function(g){return g.ex&&g.ex.totalExplores>=5;},reward:{vk:10000}},
+  {n:'OK the vault is open',  e:'🏛️', c:'Have 1 item in vault',                 f:function(g){return g.ex&&g.ex.vault&&g.ex.vault.length>=1;}},
+  {n:'Vic.collector',         e:'🎒', c:'Have 20 items in vault',               f:function(g){return g.ex&&g.ex.vault&&g.ex.vault.length>=20;}},
+  {n:'Life of a sim',    e:'🛍️', c:'Buy your first item in the Mall',    f:function(g){return g.vault&&g.vault.items&&g.vault.items.length>=1;}, reward:{dia:5}},
+  {n:'Premium feel',     e:'🌟', c:'Buy your first profile particle',     f:function(g){return g.vault&&g.vault.items&&g.vault.items.some(function(id){return id.indexOf('ptc_')===0;});}},
+  {n:'SCP synced',       e:'🌐', c:'Join a Victor Server',                f:function(g){return g.server&&!!g.server.id;}}
 ];
+/* ── ACH CATEGORIES for collapsible display ── */
+var ACH_CATS = [
+  {
+    key:'tapping', label:'⚡ Tapping', emoji:'⚡',
+    ids:['First Tap','Speed Fingers','10K Club','100K Club','1M Club','Business Minds','Banked','Welcome to tapping society','Bot orders']
+  },
+  {
+    key:'currency', label:'💎 Currency', emoji:'💎',
+    ids:['Mined!','Diamond Fever','Diamond Hoarder','Tycoon','Lights On','Ruaushi','Star & Moon','Master of Currency','Ranger']
+  },
+  {
+    key:'exploration', label:'🗺️ Exploration', emoji:'🗺️',
+    ids:['Scavenger Hunt','Tomber','Detective Vic','Wormhole','The hunt begins','Vic.player','All roads are Vic roads','OK the vault is open','Vic.collector','Light bringer']
+  },
+  {
+    key:'staking', label:'📈 Staking', emoji:'📈',
+    ids:['master staker','Nightmares','Staking like a pro','SCP synced']
+  },
+  {
+    key:'build', label:'🏠 Build', emoji:'🏠',
+    ids:['Homeowner','Vic.Builder','Safe House','Rainy Days','Mod.Vic']
+  },
+  {
+    key:'industries', label:'🏭 Industries', emoji:'🏭',
+    ids:['Enigmared','Enigmatic','Vic loves malls','Premium feel']
+  },
+  {
+    key:'social', label:'🌐 Social', emoji:'🌐',
+    ids:['My mood','No stopping me','Connect to the world I','Connect to the world II','Connect to the world III','Lone star','Superstar']
+  }
+];
+
