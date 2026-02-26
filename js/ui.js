@@ -30,23 +30,27 @@ function doLogin(){
   var e=(document.getElementById('lemail').value||'').trim();
   if(!n||!e){toast('Fill in all fields','#ff3d5a');return;}
   if(!e.includes('@')){toast('Invalid email','#ff3d5a');return;}
-  // Button loading state
-  var btn=document.querySelector('.lbtn');
-  if(btn){btn.disabled=true;btn.querySelector('.lbtn-txt').textContent='ENTERING...';}
-  G.logins++;if(!G.name)G.name=n;if(!G.email)G.email=e;sv();
-  // Fade out login, fade in app
-  var lp=document.getElementById('lp');
-  var app=document.getElementById('app');
-  lp.style.transition='opacity 0.6s ease';
-  lp.style.opacity='0';
-  setTimeout(function(){
-    lp.style.display='none';
-    app.style.display='flex';
-    app.style.opacity='0';
-    app.style.transition='opacity 0.5s ease';
-    setTimeout(function(){app.style.opacity='1';},30);
+
+  // Save data immediately
+  G.logins++;
+  if(!G.name)  G.name  = n;
+  if(!G.email) G.email = e;
+  sv();
+
+  // Switch screens — no opacity games, just direct DOM swap
+  var lp  = document.getElementById('lp');
+  var app = document.getElementById('app');
+
+  if(lp)  lp.style.display  = 'none';
+  if(app) app.style.display = 'flex';
+
+  // Boot the game
+  try {
     initGame();
-  },600);
+  } catch(err) {
+    console.error('initGame error:', err);
+    // Even if something fails, keep the app visible
+  }
 }
 
 /* INIT */
@@ -432,6 +436,7 @@ function saveProfile(){
   var bio=(document.getElementById('piBioInp')||{}).value||'';
   if(!name.trim()){toast('Name cannot be empty','#FF453A');return;}
   G.name=name.trim().slice(0,24);G.bio=bio.trim().slice(0,120);
+  G.bioChanges=(G.bioChanges||0)+1;
   sv();if(typeof fbSave==='function') fbSave();
   toast('✅ Profile saved!','#30D158');_piEditMode=false;renderPlayerInfo();
   if(typeof questProgress==='function') questProgress('bio',1);
@@ -531,4 +536,3 @@ function toggleInfoSec(key) {
   _infoOpen[key] = _infoOpen[key] === false ? true : false;
   buildAboutPage();
 }
-
