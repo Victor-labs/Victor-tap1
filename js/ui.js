@@ -381,43 +381,70 @@ function renderPlayerInfo(){
 function renderViewProfile(el,pic,badgePills,serverPill,myServer,scpStatus){
   var joined=G.joinedAt?new Date(G.joinedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'Unknown';
   var victorBanner=typeof buildGetVictor==='function'?buildGetVictor():'';
-  var sd=typeof statusDotHTML==='function'?statusDotHTML(G.status||'online'):'';
+  var statusKey=G.status||'online';
+  var statusColors={online:'#30D158',idle:'#FF9F0A',dnd:'#FF453A',invisible:'#636366'};
+  var statusLabels={online:'Online',idle:'Idle',dnd:'Do Not Disturb',invisible:'Invisible'};
+  var dotColor=statusColors[statusKey]||'#30D158';
+  var statLabel=statusLabels[statusKey]||'Online';
+
   el.innerHTML='<div class="pi-wrap">'
-    +'<div class="pi-banner"></div>'
-    +'<div class="pi-av-row">'
-    +'<div class="pav-wrap-outer" onclick="if(typeof openStatusPicker===\'function\')openStatusPicker()" title="Change status">'
+    +'<div class="pi-av-row" style="padding-top:20px;">'
+    +'<div class="pav-wrap-outer" onclick="if(typeof openStatusPicker===\'function\')openStatusPicker()" title="Change Status">'
     +'<div class="pav-wrap" id="playerAvatarWrap">'+pic+'</div>'
-    +'<div class="status-dot-avatar" id="profileStatusDot"></div>'
+    +'<div class="status-dot-avatar" id="profileStatusDot" style="background:'+dotColor+';box-shadow:0 0 6px '+dotColor+'88;"></div>'
     +'</div>'
-    +'<div class="pi-name-row"><div class="pi-name">'+(G.name||'Player')+'</div>'
-    +'<div class="pi-sub">'+(G.name||'victorvk').toLowerCase().replace(/\s/g,'')+'</div></div>'
+    +'<div class="pi-av-nameblock">'
+    +'<div class="pi-name">'+(G.name||'Player')+'</div>'
+    +'<div class="pi-handle">'+(G.name||'victorvk').toLowerCase().replace(/\s/g,'')+'</div>'
+    +'</div>'
+    +'<button class="pi-edit-btn-sm" onclick="toggleEditMode(true)">✏️ Edit</button>'
+    +'</div>'
+    /* Status line */
+    +'<div class="pi-status-line"><span class="pi-status-dot" style="background:'+dotColor+';"></span>'+statLabel+'</div>'
+    /* Badges */
     +(badgePills||serverPill?'<div class="pi-badges-row">'+badgePills+serverPill+'</div>':'')
-    +(G.bio?'<div class="pi-bio"><span style="font-size:0.75rem;">💬</span> '+G.bio+'</div>':'')
-    +'<button class="pi-edit-btn" onclick="toggleEditMode(true)">✏️ Edit Profile</button>'
+    /* Victor+ */
     +victorBanner
+    /* About card */
+    +'<div class="pi-card">'
+    +'<div class="pi-card-section">'
+    +'<div class="pi-card-lbl">ABOUT ME</div>'
+    +(G.bio
+      ?'<div class="pi-card-body">'+G.bio+'</div>'
+      :'<div class="pi-card-body pi-card-muted">No bio yet — <span class="pi-card-link" onclick="toggleEditMode(true)">Add one</span></div>')
+    +'</div>'
+    +'<div class="pi-card-divider"></div>'
+    +'<div class="pi-card-section">'
+    +'<div class="pi-card-lbl">MEMBER SINCE</div>'
+    +'<div class="pi-card-body">'+joined+'</div>'
+    +'</div>'
+    +'</div>'
+    /* Stats */
+    +'<div class="pi-card pi-card-stats">'
     +'<div class="pi-stats-grid">'
     +piStat('🪙','VK Coins',fm(G.vk))
     +piStat('💎','Diamonds',G.dia)
     +piStat('🏆','Rank',typeof getRk==='function'?getRk().n:'—')
-    +piStat('📅','Joined',joined)
-    +piStat('👆','Total Taps',fm(G.taps||0))
+    +piStat('👆','Taps',fm(G.taps||0))
     +piStat('🏠','Homes',G.build?G.build.homes.length:0)
     +piStat('🏅','Achievements',(G.ach||[]).filter(Boolean).length+'/69')
-    +piStat('💫','SCP Balance',G.server?(G.server.scp||0)+' SCP':'—')
-    +'</div>'
+    +piStat('💫','SCP Balance',G.server?(G.server.scp||0)+' SCP':'0 SCP')
+    +'</div></div>'
+    /* SCP row */
     +(myServer&&scpStatus?'<div class="pi-scp-row">'
       +(scpStatus.ready?'<button class="scp-btn scp-claim" onclick="claimScp();renderPlayerInfo()">💫 Collect SCP</button>'
         :'<button class="scp-btn scp-wait" disabled>⏳ SCP in '+scpStatus.h+'h '+scpStatus.m+'m</button>')
       +(G.server.scp>0?'<button class="scp-btn scp-exchange" onclick="exchangeScp();renderPlayerInfo()">Exchange → VK</button>':'')
       +'</div>':'')
-    +'<div class="pi-section-title">📋 Weekly Quests</div>'
+    /* Quests */
+    +'<div class="pi-section-title">📋 WEEKLY QUESTS</div>'
     +'<div id="questsBody"></div>'
-    +'<div class="pi-section-title">🏛️ My Vault</div>'
+    /* Vault */
+    +'<div class="pi-section-title">🏛️ MY VAULT</div>'
     +'<div id="vaultBody"></div>'
     +'</div>';
   if(typeof renderQuestsSection==='function') renderQuestsSection();
   if(typeof renderVaultTab==='function') renderVaultTab();
-  // Apply correct status dot color
   setTimeout(function(){if(typeof applyStatusDot==='function')applyStatusDot();},50);
 }
 
@@ -560,4 +587,4 @@ function buildAboutPage() {
 function toggleInfoSec(key) {
   _infoOpen[key] = !_infoOpen[key];
   buildAboutPage();
-      }
+    }
