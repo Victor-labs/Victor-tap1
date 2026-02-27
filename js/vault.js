@@ -267,3 +267,159 @@ function drawFlake(ctx, x, y, r) {
   }
 }
 
+/* ═══════════════════ PATCH — Jester particle + visitor particle ══════
+   Appended safely. 
+══════════════════════════════════════════════════════════════════════ */
+
+/* Override applyActiveParticle to handle jester shape */
+(function(){
+  var _origAAP = applyActiveParticle;
+  applyActiveParticle = function(){
+    var activeP = G.vault && G.vault.active && G.vault.active.particle;
+    if(activeP === 'ptc_jester'){
+      /* Jester is OWN profile — show looping Ha! Ha! Ha! canvas */
+      playJesterCanvas(true);
+      return;
+    }
+    _origAAP();
+  };
+})();
+
+/* ── JESTER CANVAS ── plays text "Ha!" floating up/down */
+var _jesterInterval = null;
+function playJesterCanvas(loop){
+  var old = document.getElementById('profileParticles');
+  if(old) old.remove();
+  clearInterval(_jesterInterval);
+
+  var canvas = document.createElement('canvas');
+  canvas.id = 'profileParticles';
+  canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;';
+  document.body.insertBefore(canvas, document.body.firstChild);
+  var ctx = canvas.getContext('2d');
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  var TEXTS  = ['Ha!', 'Ha!', 'Ha!'];
+  var COLORS = ['#FFD700','#BF5AF2','#FF6EC7'];
+  var parts  = [];
+
+  function spawnJester(){
+    for(var i=0;i<TEXTS.length;i++){
+      parts.push({
+        text:  TEXTS[i],
+        x:     80 + Math.random() * (canvas.width - 160),
+        y:     canvas.height * 0.55 + Math.random() * (canvas.height * 0.3),
+        vy:    0.6 + Math.random() * 0.8,
+        amp:   12 + Math.random() * 18,
+        phase: Math.random() * Math.PI * 2,
+        color: COLORS[i % COLORS.length],
+        alpha: 1,
+        size:  20 + Math.random() * 8,
+        life:  1
+      });
+    }
+  }
+
+  spawnJester();
+  var done = false;
+
+  function tick(){
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    var allDead = true;
+    parts.forEach(function(p){
+      if(p.life <= 0) return;
+      allDead = false;
+      p.y     -= p.vy;
+      p.phase += 0.04;
+      p.x     += Math.sin(p.phase) * 0.8;
+      p.life  -= 0.004;
+      ctx.globalAlpha = Math.max(0, p.life * 0.9);
+      ctx.font        = 'bold ' + p.size + 'px sans-serif';
+      ctx.fillStyle   = p.color;
+      ctx.fillText(p.text, p.x, p.y);
+    });
+    ctx.globalAlpha = 1;
+    if(allDead){
+      if(loop){
+        parts = [];
+        spawnJester();
+      } else {
+        done = true;
+        clearInterval(_jesterInterval);
+        setTimeout(function(){
+          var c2 = document.getElementById('profileParticles');
+          if(c2) c2.remove();
+        }, 300);
+      }
+    }
+  }
+
+  _jesterInterval = setInterval(tick, 33);
+}
+
+/* ── VISITOR PARTICLE — called when viewing another player's profile ──
+   Plays ONCE, no loop. Safe to call multiple times (cleans up previous).  */
+function playVisitorParticle(playerData){
+  var ptcId = playerData && playerData.vault && playerData.vault.active
+              ? playerData.vault.active.particle : null;
+  if(!ptcId) return;
+
+  /* Jester: special text effect, plays once */
+  if(ptcId === 'ptc_jester'){
+    playJesterCanvas(false);   /* loop=false → plays once then removes itself */
+    return;
+  }
+
+  /* All other particles: same canvas engine, but plays for 4 s then stops */
+  if(typeof MALL_PARTICLES === 'undefined') return;
+  var p = MALL_PARTICLES.find(function(x){ return x.id === ptcId; });
+  if(!p) return;
+
+  var old = document.getElementById('profileParticles');
+  if(old) old.remove();
+  clearInterval(_jesterInterval);
+
+  var canvas = document.createElement('canvas');
+  canvas.id = 'profileParticles';
+  canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;opacity:0.35;';
+  document.body.insertBefore(canvas, document.body.firstChild);
+  var ctx = canvas.getContext('2d');
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  var particles = [];
+  for(var i=0;i<p.count;i++) particles.push(newParticle(p, canvas));
+
+  var elapsed = 0;
+  var iv = setInterval(function(){
+    elapsed += 33;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(function(pt, idx){
+      pt.y -= pt.vy;
+      pt.x += Math.sin(pt.phase + pt.y * 0.01) * 0.5;
+      pt.phase += 0.02;
+      pt.life   -= 0.003;
+      if(pt.life <= 0) particles[idx] = newParticle(p, canvas);
+      ctx.globalAlpha = pt.life * 0.8;
+      ctx.fillStyle   = pt.color;
+      if(p.shape==='circle'){
+        ctx.beginPath(); ctx.arc(pt.x,pt.y,pt.size,0,Math.PI*2); ctx.fill();
+      } else if(p.shape==='star'){
+        drawStar(ctx,pt.x,pt.y,pt.size);
+      } else if(p.shape==='flake'){
+        drawFlake(ctx,pt.x,pt.y,pt.size);
+      } else {
+        ctx.font = pt.size*2+'px serif';
+        ctx.fillText(p.char||'✦', pt.x, pt.y);
+      }
+    });
+    ctx.globalAlpha = 1;
+    if(elapsed > 4000){
+      clearInterval(iv);
+      var c2 = document.getElementById('profileParticles');
+      if(c2) c2.remove();
+    }
+  }, 33);
+}
+
