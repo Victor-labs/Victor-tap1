@@ -207,27 +207,42 @@ function fbGetLeaderboard(type, callback) {
 ══════════════════════════════════════ */
 function fbSearchPlayer(name, callback) {
   fbReady(function() {
-    // Search by name (case-insensitive via nameLower field)
-    _db.collection('players')
-      .where('nameLower', '>=', name.toLowerCase())
-      .where('nameLower', '<=', name.toLowerCase() + '\uf8ff')
-      .limit(10)
-      .get()
+    var q = name.trim().toLowerCase();
+    if (!q) { callback([]); return; }
+
+    // Always do a full collection scan for reliability
+    // (avoids index issues and finds ALL players including those
+    //  registered before nameLower field was added)
+    _db.collection('players').get()
       .then(function(snap) {
         var results = [];
-        snap.forEach(function(doc) { results.push(doc.data()); });
-        callback(results);
+        snap.forEach(function(doc) {
+          var d = doc.data();
+          // Match against name, nameLower, or email prefix
+          var nm  = (d.name || '').toLowerCase();
+          var nl  = (d.nameLower || nm);
+          var em  = (d.email || '').toLowerCase().split('@')[0];
+          if (
+            nl.includes(q) ||
+            nm.includes(q) ||
+            em.includes(q)
+          ) {
+            results.push(d);
+          }
+        });
+        // Sort: exact matches first, then partial
+        results.sort(function(a, b) {
+          var an = (a.name||'').toLowerCase();
+          var bn = (b.name||'').toLowerCase();
+          var ae = an === q ? 0 : an.startsWith(q) ? 1 : 2;
+          var be = bn === q ? 0 : bn.startsWith(q) ? 1 : 2;
+          return ae - be;
+        });
+        callback(results.slice(0, 15));
       })
       .catch(function(e) {
-        // Fallback: search without index
-        _db.collection('players').get().then(function(snap) {
-          var results = [];
-          snap.forEach(function(doc) {
-            var d = doc.data();
-            if (d.name && d.name.toLowerCase().includes(name.toLowerCase())) results.push(d);
-          });
-          callback(results.slice(0,10));
-        }).catch(function(){ callback([]); });
+        console.error('fbSearchPlayer error:', e);
+        callback([]);
       });
   });
 }
@@ -505,3 +520,4 @@ document.addEventListener('visibilitychange', function(){
   else fbSetOnline();
 });
 window.addEventListener('beforeunload', fbSetOffline);
+
