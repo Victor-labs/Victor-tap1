@@ -33,7 +33,7 @@ function buildSocialShell() {
     + '<button class="soc-nb" id="snav-gift"       onclick="socialNav(\'gift\')">🎁</button>'
     + '<button class="soc-nb" id="snav-search"     onclick="socialNav(\'search\')">🔍</button>'
     + '<button class="soc-nb" id="snav-friends"    onclick="socialNav(\'friends\')">👥</button>'
-    + '<button class="soc-nb" id="snav-badges"     onclick="socialNav(\'badges\')">🏷️</button>'
+    + '<button class="soc-nb" id="snav-badges"     onclick="socialNav(\'badges\')">🏷️</button>'    + '<button class="soc-nb" id="snav-notifs" onclick="socialNav(\'notifs\')">🔔<span class="soc-notif-dot" id="socNotifDot" style="display:none;"></span></button>'
     + '</div>'
     + '<button class="soc-exit" onclick="closeSocial()">✕</button>'
     + '</div>'
@@ -57,6 +57,7 @@ function socialNav(tab) {
   if (tab === 'search')      renderSearch(body);
   if (tab === 'friends')     renderFriends(body);
   if (tab === 'badges')      { if(typeof renderBadgesTab==='function') renderBadgesTab(body); else body.innerHTML='<div class="soc-empty">Badges loading…</div>'; }
+  if (tab === 'notifs')      renderNotificationsTab(body);
 }
 
 /* ═══════════════════════════════════════
@@ -80,20 +81,31 @@ function buildProfileCard(d, isSelf, showFriendBtn) {
     : '<span style="font-size:2.2rem;">👤</span>';
   var anon = d.anonymous && !isSelf;
   var displayName = anon ? 'Anonymous' : (d.name || 'Unknown');
+  var ntClass  = (d.vault && d.vault.active && d.vault.active.nametemplate)
+    ? 'nt-' + (d.vault.active.nametemplate.replace('nt_','')) : '';
+  var fntClass = (d.vault && d.vault.active && d.vault.active.font)
+    ? d.vault.active.font : '';
   var joined = d.joinedAt ? new Date(d.joinedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—';
   var lastSeen = d.lastSeen && d.lastSeen.toDate
     ? timeAgo(d.lastSeen.toDate()) : '—';
   var online = d.online;
+  var statusKey = d.status || (online ? 'online' : 'offline');
+  var statusIcons  = {online:'🟢',idle:'🌙',dnd:'🔴',invisible:'⚫',offline:'⚫'};
+  var statusLabels = {online:'Online',idle:'Idle',dnd:'Do Not Disturb',invisible:'Offline',offline:'Offline'};
+  var displayStatus = statusKey === 'invisible'
+    ? '⚫ Offline'
+    : (statusIcons[statusKey]||'🟢')+' '+(statusLabels[statusKey]||'Online');
+  var statusCls = (statusKey==='online'||statusKey==='idle'||statusKey==='dnd') ? 'poc-on' : 'poc-off';
 
   return '<div class="profcard">'
     // Glass header
     + '<div class="profcard-hdr">'
     + '<div class="profcard-av">'+pic+'</div>'
     + '<div class="profcard-hinfo">'
-    + '<div class="profcard-name">'+displayName+'</div>'
+    + '<div class="profcard-name '+ntClass+' '+fntClass+'">'+displayName+'</div>'
     + '<div class="profcard-rank">'+( d.rank||'🌱 Newbie')+'</div>'
-    + '<div class="profcard-online '+(online?'poc-on':'poc-off')+'">'
-    + (online?'🟢 Online':'⚫ '+lastSeen)+'</div>'
+    + '<div class="profcard-online '+statusCls+'">'
+    + displayStatus+'</div>'
     + '</div>'
     + '</div>'
     // Bio
@@ -435,6 +447,10 @@ function renderFriends(body) {
               ? '<div class="fr-section">Your Friends</div>'
                 + friends.map(function(f) {
                   var online = f.online;
+                  var fsk = f.status || (online ? 'online' : 'offline');
+                  var fIcons  = {online:'🟢',idle:'🌙',dnd:'🔴',invisible:'⚫',offline:'⚫'};
+                  var fLabels = {online:'Online',idle:'Idle',dnd:'Do Not Disturb',invisible:'Offline',offline:'Offline'};
+                  var fDisplay = fsk==='invisible' ? '⚫ Offline' : (fIcons[fsk]||'🟢')+' '+(fLabels[fsk]||'Online');
                   var pic = f.profilePic
                     ? '<img src="'+f.profilePic+'" class="fr-av" style="object-fit:cover;"/>'
                     : '<div class="fr-av">'+((f.name||'?').charAt(0).toUpperCase())+'</div>';
@@ -442,7 +458,7 @@ function renderFriends(body) {
                     + pic
                     + '<div class="fr-info">'
                     + '<div class="fr-name">'+( f.name||'Unknown')+'</div>'
-                    + '<div class="fr-sub '+(online?'fr-online':'')+'">'+( online?'🟢 Online':'⚫ Offline')+'</div>'
+                    + '<div class="fr-sub '+(online&&fsk!=='invisible'?'fr-online':'')+'">'+fDisplay+'</div>'
                     + '</div>'
                     + '<div style="display:flex;gap:6px;">'
                     + '<button class="fr-btn" onclick="showPlayerCard(\''+f.email+'\')">👤</button>'
@@ -500,6 +516,79 @@ function doUnfriend(email) {
     toast('Removed from friends','#FF9F0A');
     renderFriends(document.getElementById('socBody'));
   });
+}
+
+/* ═══════════════════════════════════════
+   NOTIFICATIONS TAB
+═══════════════════════════════════════ */
+var _notifTabUnsub = null;
+
+function renderNotificationsTab(body) {
+  body.innerHTML = '<div style="padding:16px;">'
+    + '<div class="soc-sec-title">🔔 Notifications</div>'
+    + '<div id="notifList"><div class="soc-loading">Loading…</div></div>'
+    + '</div>';
+  if (_notifTabUnsub) { _notifTabUnsub(); _notifTabUnsub = null; }
+  var myDocId = typeof _myDocId === 'function' ? _myDocId() : playerDocId(G.email);
+  if (!myDocId) {
+    document.getElementById('notifList').innerHTML = '<div class="soc-empty">Log in to see notifications.</div>';
+    return;
+  }
+  var cutoff = Date.now() - 5 * 24 * 60 * 60 * 1000;
+  fbReady(function() {
+    _notifTabUnsub = _db.collection('players').doc(myDocId)
+      .collection('notifications')
+      .orderBy('ts', 'desc').limit(50)
+      .onSnapshot(function(snap) {
+        var el = document.getElementById('notifList');
+        if (!el) return;
+        var notifs = [];
+        var toDelete = [];
+        snap.forEach(function(d) {
+          var data = d.data();
+          var ts = data.ts && data.ts.toMillis ? data.ts.toMillis() : 0;
+          if (ts > 0 && ts < cutoff) { toDelete.push(d.ref); }
+          else { notifs.push({ id: d.id, ref: d.ref, data: data, ts: ts }); }
+        });
+        if (toDelete.length) {
+          var batch = _db.batch();
+          toDelete.forEach(function(ref) { batch.delete(ref); });
+          batch.commit().catch(function(){});
+        }
+        var unread = notifs.filter(function(n){ return !n.data.read; });
+        if (unread.length) {
+          var batch2 = _db.batch();
+          unread.forEach(function(n){ batch2.update(n.ref, {read:true}); });
+          batch2.commit().catch(function(){});
+          var dot = document.getElementById('socNotifDot');
+          if (dot) dot.style.display = 'none';
+        }
+        if (!notifs.length) {
+          el.innerHTML = '<div class="soc-empty">No notifications yet.</div>';
+          return;
+        }
+        var typeIcons = {gift:'🎁',like:'❤️',friendRequest:'👥',profileView:'👀',system:'📢'};
+        el.innerHTML = notifs.map(function(n) {
+          var d = n.data;
+          var icon = typeIcons[d.type] || '🔔';
+          var tsStr = n.ts ? timeAgo(new Date(n.ts)) : '';
+          return '<div class="notif-row ' + (d.read ? '' : 'notif-unread') + '">'
+            + '<div class="notif-icon">' + icon + '</div>'
+            + '<div class="notif-body">'
+            + '<div class="notif-msg">' + (d.message || '') + '</div>'
+            + '<div class="notif-ts">' + tsStr + '</div>'
+            + '</div></div>';
+        }).join('');
+      }, function() {
+        var el = document.getElementById('notifList');
+        if (el) el.innerHTML = '<div class="soc-empty">Could not load notifications.</div>';
+      });
+  });
+}
+
+function updateSocNotifDot(count) {
+  var dot = document.getElementById('socNotifDot');
+  if (dot) dot.style.display = count > 0 ? 'inline-block' : 'none';
 }
 
 /* ═══════════════════════════════════════
