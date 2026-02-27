@@ -208,33 +208,44 @@ function loadLB() {
 function renderChat(body) {
   body.innerHTML = ''
     + '<div class="chat-wrap">'
-    + '<div class="chat-msgs" id="chatMsgs"><div class="soc-loading">Loading chat…</div></div>'
+    + '<div class="chat-msgs" id="chatMsgs"><div class="soc-loading">Loading chat...</div></div>'
     + '<div class="chat-input-row">'
-    + '<input class="chat-inp" id="chatInp" placeholder="Type a message…" maxlength="300" onkeydown="if(event.key===\'Enter\')sendChat()"/>'
-    + '<button class="chat-send" onclick="sendChat()">➤</button>'
+    + '<input class="chat-inp" id="chatInp" placeholder="Message everyone..." maxlength="300" onkeydown="if(event.key===\'Enter\'){event.preventDefault();sendChat();}" autocomplete="off"/>'
+    + '<button class="chat-send" onclick="sendChat()">&#10148;</button>'
     + '</div></div>';
 
   fbListenChat(function(msgs) {
     var el = document.getElementById('chatMsgs');
     if (!el) return;
-    if (!msgs.length) { el.innerHTML='<div class="soc-empty">No messages yet. Say hi! 👋</div>'; return; }
+    if (!msgs.length) {
+      el.innerHTML = '<div class="soc-empty">No messages yet. Say hi!</div>';
+      return;
+    }
+    var wasAtBottom = (el.scrollHeight - el.scrollTop) <= (el.clientHeight + 80);
     el.innerHTML = msgs.map(function(m) {
       var isMe = m.email === G.email;
-      var pic  = m.profilePic
-        ? '<img src="'+m.profilePic+'" class="chat-av" />'
-        : '<div class="chat-av chat-av-def">'+((m.name||'?').charAt(0))+'</div>';
-      var time = m.ts && m.ts.toDate ? m.ts.toDate().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : '';
-      return '<div class="chat-msg '+(isMe?'chat-msg-me':'')+'">'
-        + (!isMe ? pic : '')
+      var initial = (m.name || '?').charAt(0).toUpperCase();
+      var picBg = isMe ? '#FF9F0A,#FFD60A' : '#5AC8FA,#BF5AF2';
+      var pic = m.profilePic
+        ? '<img src="' + m.profilePic + '" class="chat-av" />'
+        : '<div class="chat-av chat-av-def" style="background:linear-gradient(135deg,' + picBg + ');">' + initial + '</div>';
+      var time = (m.ts && m.ts.toDate)
+        ? m.ts.toDate().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+        : '';
+      var nameColor = isMe ? '#FFD60A' : '#5AC8FA';
+      var displayName = isMe ? (G.name || 'You') : (m.name || 'Player');
+      return '<div class="chat-msg">'
+        + pic
         + '<div class="chat-bubble-wrap">'
-        + (!isMe?'<div class="chat-sender">'+m.name+'</div>':'')
-        + '<div class="chat-bubble '+(isMe?'chat-bubble-me':'')+'">'+escHTML(m.text)+'</div>'
-        + '<div class="chat-time">'+time+'</div>'
+        + '<div class="chat-sender-row">'
+        + '<span style="color:' + nameColor + ';font-weight:700;font-size:0.72rem;">' + displayName + '</span>'
+        + '<span class="chat-ts">' + time + '</span>'
         + '</div>'
-        + (isMe ? pic : '')
+        + '<div class="chat-bubble ' + (isMe ? 'chat-bubble-me' : '') + '">' + escHTML(m.text) + '</div>'
+        + '</div>'
         + '</div>';
     }).join('');
-    el.scrollTop = el.scrollHeight;
+    if (wasAtBottom) el.scrollTop = el.scrollHeight;
   });
 }
 
@@ -371,8 +382,17 @@ function showPlayerCard(email) {
           + '<button class="player-card-close" onclick="this.closest(\'.player-card-ov\').remove()">✕</button>'
           + buildProfileCard(d, false, true)
           + '</div>';
-        ov.addEventListener('click', function(e){ if(e.target===ov) ov.remove(); });
+        ov.addEventListener('click', function(e){
+          if(e.target===ov){
+            ov.remove();
+            /* clean up visitor particle when closing */
+            var pc=document.getElementById('profileParticles');
+            if(pc) pc.remove();
+          }
+        });
         document.body.appendChild(ov);
+        /* Trigger visitor particle effect (plays once, no loop) */
+        if(typeof playVisitorParticle==='function') playVisitorParticle(d);
       }).catch(function(){ toast('Could not load profile','#FF453A'); });
   });
 }
@@ -553,3 +573,4 @@ function timeAgo(date) {
   if (sec < 86400)return Math.floor(sec/3600)+'h ago';
   return Math.floor(sec/86400)+'d ago';
 }
+
