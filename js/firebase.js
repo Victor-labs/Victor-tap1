@@ -32,12 +32,12 @@
    FIREBASE APP CONFIG
 ───────────────────────────────────────────────────────────────── */
 var FB_CFG = {
-  apiKey:            'AIzaSyDLJ7uWgRGCD7EgfJ57ibnnhz334BCJkLg',
-  authDomain:        'victor-coin.firebaseapp.com',
-  projectId:         'victor-coin',
-  storageBucket:     'victor-coin.firebasestorage.app',
-  messagingSenderId: '1080734767954',
-  appId:             '1:1080734767954:web:de6c75ba3e5e070299f88b'
+  apiKey:            'AIzaSyAuXUjRzILIZTazgg8pFbr_9qn4Tnuiz84',
+  authDomain:        'victor-b0773.firebaseapp.com',
+  projectId:         'victor-b0773',
+  storageBucket:     'victor-b0773.firebasestorage.app',
+  messagingSenderId: '813564661719',
+  appId:             '1:813564661719:web:11c07067ad3e483204c592'
 };
 
 
@@ -107,15 +107,15 @@ function initFirebase() {
 
       /*
        * Guarantee the player document exists in Firestore.
+       * We must NOT call _ensurePlayerDoc until G exists and has
+       * real data — a fixed timeout is unreliable because ld()
+       * (which restores G from localStorage) may finish faster or
+       * slower depending on device speed.
        *
-       * We delay 2.5 s so that main.js / ld() has had time to
-       * restore G from localStorage before we read G.name, G.vk etc.
-       *
-       * On first login  → creates the document.
-       * On return login → merges fresh stats, cloud economy wins.
-       * On rules error  → blind-write as last resort.
+       * _waitForGThenEnsure() polls every 500 ms until G is ready,
+       * then calls _ensurePlayerDoc() exactly once.
        */
-      setTimeout(_ensurePlayerDoc, 2500);
+      _waitForGThenEnsure();
     });
 
     /* Sign in anonymously if no session exists yet */
@@ -156,9 +156,12 @@ function initFirebase() {
  * Returns '' if email is empty/null.
  */
 function playerDocId(email) {
+  // Sanitise email into a valid Firestore doc ID.
+  // Firestore forbids: . # $ [ ] / in document IDs.
+  // Returns '' if email is falsy — caller must handle this case.
   var e = (email || '').trim().toLowerCase();
   if (!e) return '';
-  return e.replace(/[.#$[\]\/]/g, '_');
+  return e.replace(/[.#$[\]\/@]/g, '_');
 }
 
 /**
@@ -167,6 +170,13 @@ function playerDocId(email) {
  * Never returns '' as long as the user is authenticated.
  */
 function _myDocId() {
+  // For anonymous users: always use 'uid_<firebaseUID>' as the doc ID.
+  // This matches the isOwner() rule which checks 'uid_' + request.auth.uid.
+  // For email users: prefer the sanitised email doc ID (kept for backwards
+  // compatibility with documents already created under email-based IDs).
+  if (_fbUid && (!G || !G.email || G.email.indexOf('@') === -1)) {
+    return 'uid_' + _fbUid;
+  }
   var byEmail = playerDocId(G && G.email ? G.email : '');
   if (byEmail) return byEmail;
   if (_fbUid)  return 'uid_' + _fbUid;
@@ -277,6 +287,57 @@ function buildPlayerData() {
         b. MISSING → write full document immediately (first login).
         c. GET ERR → blind SET as last resort so user is visible.
 ════════════════════════════════════════════════════════════════ */
+/*
+ * _waitForGThenEnsure
+ * ─────────────────────────────────────────────────────────────────
+ * Polls every 500 ms until BOTH conditions are satisfied:
+ *   1. _fbReady is true  (auth resolved)
+ *   2. G exists AND has at least one populated required field
+ *      (G.name or G.vk is set — proof that ld() has finished)
+ * Then calls _ensurePlayerDoc() exactly once per session.
+ *
+ * We track calls with _docEnsured so re-auth events don't trigger
+ * a second write in the same session.
+ */
+var _docEnsured = false;   /* true once _ensurePlayerDoc has run */
+
+function _waitForGThenEnsure() {
+  /* Already ran this session — nothing to do */
+  if (_docEnsured) return;
+
+  /* Check whether G is ready: must exist and carry real game data */
+  function gIsReady() {
+    return (
+      typeof G !== 'undefined' &&
+      G !== null &&
+      (
+        (typeof G.name === 'string' && G.name.trim().length > 0) ||
+        (typeof G.vk   === 'number' && G.vk   >= 0)
+      )
+    );
+  }
+
+  if (_fbReady && gIsReady()) {
+    /* Both conditions met immediately — run now */
+    _docEnsured = true;
+    _ensurePlayerDoc();
+    return;
+  }
+
+  /* At least one condition not yet met — poll every 500 ms */
+  var _gPollTimer = setInterval(function() {
+    if (!_fbReady || !gIsReady()) return;   /* still waiting */
+
+    clearInterval(_gPollTimer);
+
+    if (_docEnsured) return;   /* guard against rapid double-fire */
+    _docEnsured = true;
+
+    console.log('[FB] G is ready (name="' + (G.name || '') + '", vk=' + (G.vk || 0) + ') — running _ensurePlayerDoc');
+    _ensurePlayerDoc();
+  }, 500);
+}
+
 function _ensurePlayerDoc() {
   var docId = _myDocId();
   if (!docId) {
@@ -342,6 +403,13 @@ function _ensurePlayerDoc() {
 
         var firstDoc = buildPlayerData();
 
+        /* Guard: never write an empty object to Firestore */
+        if (!firstDoc || Object.keys(firstDoc).length === 0) {
+          console.error('[FB] Abort: buildPlayerData returned empty — skipping write for', docId);
+          return;
+        }
+        console.log('[FB] Creating player doc with data:', firstDoc);
+
         ref.set(firstDoc, { merge: true })
           .then(function() {
             console.log('[FB] Player doc CREATED:', docId);
@@ -370,7 +438,13 @@ function _ensurePlayerDoc() {
       /* Last resort: attempt a blind write so the user is at least
          visible in leaderboard / search even if we couldn't read.  */
       G.joinedAt = G.joinedAt || Date.now();
-      ref.set(buildPlayerData(), { merge: true })
+      var blindDoc = buildPlayerData();
+      if (!blindDoc || Object.keys(blindDoc).length === 0) {
+        console.error('[FB] Abort: buildPlayerData returned empty — skipping blind-write for', docId);
+        return;
+      }
+      console.log('[FB] Creating player doc with data:', blindDoc);
+      ref.set(blindDoc, { merge: true })
         .then(function() {
           console.log('[FB] Blind-write succeeded for:', docId);
         })
@@ -783,10 +857,13 @@ function fbUnfriend(friendEmail, callback) {
 var _notifUnsub = null;
 
 function fbListenNotifications() {
-  if (!G.email || !_fbReady) return;
+  // Use _myDocId() so anonymous users without G.email are also covered.
+  if (!_fbReady) return;
+  var docId = _myDocId();
+  if (!docId) return;
   if (_notifUnsub) _notifUnsub(); /* detach old listener */
 
-  _notifUnsub = _db.collection('players').doc(playerDocId(G.email))
+  _notifUnsub = _db.collection('players').doc(docId)
     .collection('notifications')
     .orderBy('ts', 'desc').limit(20)
     .onSnapshot(function(snap) {
@@ -811,7 +888,8 @@ function updateNotifBadge(count) {
 var _chatUnsub = null;
 
 function fbSendMessage(text) {
-  if (!text || !text.trim() || !G.email) return;
+  // Allow anonymous users to chat — they have a uid even without an email.
+  if (!text || !text.trim() || !_fbUid) return;
   fbReady(function() {
     _db.collection('chat').add({
       name:       (G.settings && G.settings.anonymous) ? 'Anonymous' : (G.name || 'Player'),
@@ -861,8 +939,11 @@ function fbCleanChat() {
    ONLINE PRESENCE
 ════════════════════════════════════════════════════════════════ */
 function fbSetOnline() {
-  if (!G || !G.email || !_fbReady || !_db) return;
-  _db.collection('players').doc(playerDocId(G.email))
+  // Use _myDocId() so anonymous users (no G.email) are also updated.
+  if (!_fbReady || !_db) return;
+  var docId = _myDocId();
+  if (!docId) return;
+  _db.collection('players').doc(docId)
      .update({
        online:   true,
        lastSeen: firebase.firestore.FieldValue.serverTimestamp()
@@ -871,8 +952,10 @@ function fbSetOnline() {
 }
 
 function fbSetOffline() {
-  if (!G || !G.email || !_fbReady || !_db) return;
-  _db.collection('players').doc(playerDocId(G.email))
+  if (!_fbReady || !_db) return;
+  var docId = _myDocId();
+  if (!docId) return;
+  _db.collection('players').doc(docId)
      .update({
        online:   false,
        lastSeen: firebase.firestore.FieldValue.serverTimestamp()
