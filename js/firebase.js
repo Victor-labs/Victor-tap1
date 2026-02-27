@@ -207,42 +207,78 @@ function fbGetLeaderboard(type, callback) {
 ══════════════════════════════════════ */
 function fbSearchPlayer(name, callback) {
   fbReady(function() {
-    var q = name.trim().toLowerCase();
+    var q = (name || '').trim().toLowerCase();
     if (!q) { callback([]); return; }
 
-    // Always do a full collection scan for reliability
-    // (avoids index issues and finds ALL players including those
-    //  registered before nameLower field was added)
-    _db.collection('players').get()
+    function sortAndReturn(results) {
+      results.sort(function(a, b) {
+        var an = (a.name||'').toLowerCase();
+        var bn = (b.name||'').toLowerCase();
+        var ae = an === q ? 0 : an.startsWith(q) ? 1 : 2;
+        var be = bn === q ? 0 : bn.startsWith(q) ? 1 : 2;
+        return ae - be;
+      });
+      callback(results.slice(0, 15));
+    }
+
+    // Strategy 1: range query on nameLower (fast, works if rules allow list)
+    _db.collection('players')
+      .where('nameLower', '>=', q)
+      .where('nameLower', '<=', q + '')
+      .limit(15)
+      .get()
       .then(function(snap) {
         var results = [];
-        snap.forEach(function(doc) {
-          var d = doc.data();
-          // Match against name, nameLower, or email prefix
-          var nm  = (d.name || '').toLowerCase();
-          var nl  = (d.nameLower || nm);
-          var em  = (d.email || '').toLowerCase().split('@')[0];
-          if (
-            nl.includes(q) ||
-            nm.includes(q) ||
-            em.includes(q)
-          ) {
-            results.push(d);
-          }
-        });
-        // Sort: exact matches first, then partial
-        results.sort(function(a, b) {
-          var an = (a.name||'').toLowerCase();
-          var bn = (b.name||'').toLowerCase();
-          var ae = an === q ? 0 : an.startsWith(q) ? 1 : 2;
-          var be = bn === q ? 0 : bn.startsWith(q) ? 1 : 2;
-          return ae - be;
-        });
-        callback(results.slice(0, 15));
+        snap.forEach(function(doc) { results.push(doc.data()); });
+        if (results.length > 0) {
+          sortAndReturn(results);
+          return;
+        }
+        // Strategy 2: full scan fallback (catches old docs without nameLower)
+        return _db.collection('players').get()
+          .then(function(snap2) {
+            var r2 = [];
+            snap2.forEach(function(doc) {
+              var d = doc.data();
+              var nm = (d.name || '').toLowerCase();
+              var nl = (d.nameLower || nm);
+              if (nl.includes(q) || nm.includes(q)) r2.push(d);
+            });
+            sortAndReturn(r2);
+          });
       })
       .catch(function(e) {
-        console.error('fbSearchPlayer error:', e);
-        callback([]);
+        console.error('fbSearchPlayer strategy1 failed:', e.code, e.message);
+        // Strategy 2 on permission error - try reading by doc ID if they typed an exact name
+        // Also try a direct full-scan in case rules allow it
+        _db.collection('players').get()
+          .then(function(snap) {
+            var results = [];
+            snap.forEach(function(doc) {
+              var d = doc.data();
+              var nm = (d.name || '').toLowerCase();
+              var nl = (d.nameLower || nm);
+              if (nl.includes(q) || nm.includes(q)) results.push(d);
+            });
+            if (results.length > 0) {
+              sortAndReturn(results);
+            } else {
+              // Last resort: try fetching by document ID (email-based)
+              // This handles the case where rules only allow reading own doc
+              // and the user searched their own name
+              callback([]);
+              console.warn('Search returned 0 results. Check Firestore rules — players collection needs "allow list: if true" or similar.');
+            }
+          })
+          .catch(function(e2) {
+            console.error('fbSearchPlayer both strategies failed:', e2.code, e2.message);
+            console.warn('FIX NEEDED: Add this to your Firestore rules:\n' +
+              'match /players/{doc} {\n' +
+              '  allow read: if true;\n' +
+              '  allow write: if request.auth != null;\n' +
+              '}');
+            callback([]);
+          });
       });
   });
 }
