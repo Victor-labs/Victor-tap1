@@ -197,3 +197,51 @@ function escHTML(s){
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+/* ═══════════════════ PATCH — New Name Templates ═══════════════════
+   Appended safely — does not touch existing code above
+═══════════════════════════════════════════════════════════════════ */
+(function(){
+  NAME_TEMPLATES.push(
+    {
+      id:'nt_jester',
+      name:'Jester',
+      price:750000,
+      emoji:'🪄',
+      desc:'Magic wands and hats float with gold & purple sparkles',
+      cssClass:'nt-jester',
+      preview:'VICTOR'
+    },
+    {
+      id:'nt_horseyear',
+      name:'Year of the Horse',
+      price:750000,
+      emoji:'🏮',
+      desc:'Chinese lanterns drift with white, red & gold particles',
+      cssClass:'nt-horseyear',
+      preview:'VICTOR'
+    }
+  );
+
+  // Patch ntParticles to recognise the new classes
+  var _origNtParticles = ntParticles;
+  ntParticles = function(cls) {
+    var extras = {
+      'nt-jester':    {chars:['🪄','🎩','✦','·'], count:5},
+      'nt-horseyear': {chars:['🏮','✦','·','★'],  count:5}
+    };
+    if (extras[cls]) {
+      var cfg = extras[cls];
+      var h = '';
+      for (var i = 0; i < cfg.count; i++) {
+        var ch = cfg.chars[i % cfg.chars.length];
+        h += '<span class="nt-particle nt-p-'+i+'" aria-hidden="true">'+ch+'</span>';
+      }
+      return h;
+    }
+    return _origNtParticles(cls);
+  };
+
+  // Patch confirmBuyMall to see new NAME_TEMPLATES entries (already included since it reads the array)
+  // Patch executeMallBuy to route new name templates (already handled by NAME_TEMPLATES.find)
+})();
+
