@@ -523,7 +523,7 @@ button,.si,.badge-pill,.soc-nb,.nt-buy-btn,.mall-buy-btn,.exnav-btn{
   .stake-dir-row{grid-template-columns:1fr 1fr;}
 
   /* ── PLAYER INFO ── */
-  .pi-banner{height:65px!important;}
+  .pi-banner{display:none!important;}
   .pav-wrap{width:58px!important;height:58px!important;}
   .pi-name{font-size:0.9rem!important;max-width:calc(100vw - 120px);}
   .pi-sub{font-size:0.6rem;}
@@ -2036,7 +2036,7 @@ button,.si,.badge-pill,.soc-nb,.nt-buy-btn,.mall-buy-btn,.exnav-btn{
 .chat-msgs::-webkit-scrollbar{width:3px;}
 .chat-msgs::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);}
 .chat-msg{display:flex;align-items:flex-end;gap:7px;margin-bottom:10px;}
-.chat-msg-me{flex-direction:row-reverse;}
+.chat-msg-me{/* all messages left-aligned */}
 .chat-av{
   width:32px;height:32px;border-radius:50%;flex-shrink:0;object-fit:cover;
   align-self:flex-start;margin-top:2px;
@@ -2050,6 +2050,8 @@ button,.si,.badge-pill,.soc-nb,.nt-buy-btn,.mall-buy-btn,.exnav-btn{
 }
 .chat-bubble-wrap{max-width:72%;}
 .chat-sender{font-size:0.62rem;font-weight:700;color:var(--teal);margin-bottom:3px;padding-left:4px;}
+.chat-sender-row{display:flex;align-items:baseline;gap:8px;margin-bottom:3px;padding-left:2px;}
+.chat-ts{font-size:0.55rem;color:var(--text3);font-weight:400;}
 .chat-bubble{
   background:rgba(255,255,255,0.08);
   border:1px solid rgba(255,255,255,0.1);
@@ -2430,20 +2432,16 @@ button,.si,.badge-pill,.soc-nb,.nt-buy-btn,.mall-buy-btn,.exnav-btn{
    PLAYER INFO — DISCORD STYLE
 ═══════════════════════════════════════ */
 .pi-wrap{padding-bottom:40px;}
-.pi-banner{
-  height:72px;
-  background:linear-gradient(135deg,#1a0a2e,#0d1f3c,#0a2818);
-  position:relative;
-}
+.pi-banner{display:none;}
 .pi-av-row{
-  display:flex;align-items:flex-end;
-  padding:0 16px;margin-top:-34px;
-  position:relative;z-index:1;gap:10px;
+  display:flex;align-items:center;
+  padding:16px 16px 8px;margin-top:0;
+  position:relative;z-index:1;gap:12px;
 }
 .pav-wrap{
-  width:68px;height:68px;border-radius:50%;
-  background:rgba(255,255,255,0.08);
-  border:3px solid var(--bg);
+  width:72px;height:72px;border-radius:50%;
+  background:rgba(255,255,255,0.1);
+  border:4px solid #0a0a0f;
   display:flex;align-items:center;justify-content:center;
   overflow:hidden;flex-shrink:0;position:relative;
   cursor:pointer;transition:all 0.3s;
@@ -3310,3 +3308,148 @@ button,.si,.badge-pill,.soc-nb,.nt-buy-btn,.mall-buy-btn,.exnav-btn{
 @keyframes specialPulse{0%,100%{box-shadow:0 0 4px rgba(255,110,199,0.3);}50%{box-shadow:0 0 10px rgba(255,110,199,0.6);}}
 
 .badge-card{position:relative;}
+
+/* ═══════════════════════════════════════════════════════
+   NEW MALL ITEMS — Name Templates + Hat Cosmetics
+   + Special Frames + Jester particle
+   ═══════════════════════════════════════════════════════ */
+
+/* ── JESTER Name Template ── */
+.nt-jester {
+  background: linear-gradient(90deg,
+    rgba(100,0,160,0.35),
+    rgba(180,130,0,0.3),
+    rgba(100,0,160,0.35));
+  border: 1px solid rgba(191,90,242,0.45);
+}
+.nt-jester .nt-preview-name {
+  background: linear-gradient(90deg, #FFD700, #BF5AF2, #FF6EC7, #FFD700);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200%;
+  animation: jesterShift 2.5s linear infinite;
+}
+@keyframes jesterShift {
+  0%   { background-position: 0%;   }
+  100% { background-position: 200%; }
+}
+.nt-jester .nt-particle {
+  animation: jesterFloat 2.2s ease-in-out infinite;
+}
+@keyframes jesterFloat {
+  0%,100% { transform: translateY(0)  rotate(0deg)  scale(1);   opacity:0.7; }
+  33%     { transform: translateY(-6px) rotate(15deg) scale(1.2); opacity:1;   }
+  66%     { transform: translateY(3px) rotate(-10deg) scale(0.9); opacity:0.5; }
+}
+
+/* ── YEAR OF THE HORSE Name Template ── */
+.nt-horseyear {
+  background: linear-gradient(90deg,
+    rgba(140,0,0,0.3),
+    rgba(200,160,0,0.25),
+    rgba(140,0,0,0.3));
+  border: 1px solid rgba(220,50,50,0.4);
+}
+.nt-horseyear .nt-preview-name {
+  background: linear-gradient(90deg, #ffffff, #FFD700, #FF3B30, #FFD700, #ffffff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200%;
+  animation: horseShift 3s linear infinite;
+}
+@keyframes horseShift {
+  0%   { background-position: 0%;   }
+  100% { background-position: 200%; }
+}
+.nt-horseyear .nt-particle {
+  animation: lanternFloat 3.5s ease-in-out infinite;
+}
+@keyframes lanternFloat {
+  0%,100% { transform: translateY(0) rotate(-5deg); opacity:0.8; }
+  50%     { transform: translateY(-7px) rotate(5deg); opacity:1;  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   HAT COSMETICS — emoji sitting on top of avatar
+   ═══════════════════════════════════════════════════════ */
+.av-hat {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.9rem;
+  line-height: 1;
+  pointer-events: none;
+  z-index: 10;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.7));
+  animation: hatBob 3s ease-in-out infinite;
+}
+@keyframes hatBob {
+  0%,100% { transform: translateX(-50%) translateY(0)   rotate(-3deg); }
+  50%     { transform: translateX(-50%) translateY(-3px) rotate(3deg);  }
+}
+/* Jokkie — jester/joker themed */
+.hat-jokkie {
+  font-size: 2rem;
+  filter: drop-shadow(0 0 6px rgba(255,215,0,0.6));
+}
+/* Every Witch Way — witch hat */
+.hat-witch {
+  font-size: 2rem;
+  top: -20px;
+  filter: drop-shadow(0 0 6px rgba(130,0,200,0.5));
+}
+
+/* ═══════════════════════════════════════════════════════
+   GELATIONUS LIQUID — jelly overlay on avatar
+   ═══════════════════════════════════════════════════════ */
+.spec-gelatin {
+  position: relative;
+  overflow: visible !important;
+}
+.spec-gelatin::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    rgba(135,206,250,0.45) 0%,
+    rgba(100,200,255,0.25) 50%,
+    rgba(60,160,230,0.1)  80%,
+    transparent 100%);
+  border: 2px solid rgba(135,206,250,0.5);
+  animation: gelatinWobble 2.5s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 4;
+  box-shadow:
+    inset 0 0 12px rgba(135,206,250,0.3),
+    0 0 18px rgba(100,200,255,0.25);
+}
+@keyframes gelatinWobble {
+  0%,100% { transform: scaleX(1)    scaleY(1);    border-radius: 50%;                    }
+  20%     { transform: scaleX(1.06) scaleY(0.95); border-radius: 55% 45% 50% 50%;       }
+  40%     { transform: scaleX(0.95) scaleY(1.07); border-radius: 50% 50% 45% 55%;       }
+  60%     { transform: scaleX(1.04) scaleY(0.97); border-radius: 48% 52% 54% 46%;       }
+  80%     { transform: scaleX(0.97) scaleY(1.03); border-radius: 52% 48% 47% 53%;       }
+}
+
+/* ═══════════════════════════════════════════════════════
+   VIC SANTA — Christmas tree + gift orbiter
+   ═══════════════════════════════════════════════════════ */
+.av-tree {
+  position: absolute;
+  right: -28px;
+  bottom: 0;
+  font-size: 1.7rem;
+  line-height: 1;
+  pointer-events: none;
+  z-index: 6;
+  animation: treeSway 2s ease-in-out infinite;
+  filter: drop-shadow(0 2px 6px rgba(0,160,0,0.4));
+}
+@keyframes treeSway {
+  0%,100% { transform: rotate(-4deg); }
+  50%     { transform: rotate(4deg);  }
+}
+/* The gift orbiter reuses existing .av-orbiter with 🎁 items */
+
