@@ -284,3 +284,21 @@ function renderMallParticles() {
   el.innerHTML = h;
 }
 
+/* ═══════════════════ PATCH — Jester Particle ═════════════════════
+   Appended safely — no existing code changed.
+═══════════════════════════════════════════════════════════════════ */
+(function(){
+  MALL_PARTICLES.push({
+    id:'ptc_jester',
+    name:'Jester Effect',
+    price:900000,
+    count:6,
+    shape:'jester',
+    minSize:10,
+    maxSize:16,
+    colors:['#FFD700','#BF5AF2','#FF6EC7'],
+    desc:'Ha! Ha! Ha! floats on your profile — plays once per visit',
+    char:'Ha!'
+  });
+})();
+
