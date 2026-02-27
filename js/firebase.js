@@ -653,7 +653,11 @@ function fbSendGift(toName, type, amount, callback) {
         }
 
         var recip   = snap.docs[0].data();
+        // Resolve recipient doc ID: prefer email-based ID, fall back to
+        // uid_ format for anonymous users who have no real email stored.
         var recipId = playerDocId(recip.email);
+        if (!recipId && recip.uid) recipId = 'uid_' + recip.uid;
+        if (!recipId) { callback({ error: 'Cannot resolve recipient ID' }); return; }
         var batch   = _db.batch();
 
         /* Deduct from sender locally */
@@ -875,9 +879,12 @@ function fbListenNotifications() {
 
 function updateNotifBadge(count) {
   var badge = document.getElementById('notifBadge');
-  if (!badge) return;
-  badge.textContent   = count > 0 ? count : '';
-  badge.style.display = count > 0 ? 'flex' : 'none';
+  if (badge) {
+    badge.textContent   = count > 0 ? count : '';
+    badge.style.display = count > 0 ? 'flex' : 'none';
+  }
+  // Also light up the red dot on the social overlay bell icon
+  if (typeof updateSocNotifDot === 'function') updateSocNotifDot(count);
 }
 
 
