@@ -1,5 +1,5 @@
 /* NAV */
-var PG={game:'⚡ VICTOR COIN',shop:'🛒 SHOP',factory:'🏭 FACTORY',diamonds:'💎 DIAMONDS',daily:'🎁 DAILY',miner:'🤖 AUTO MINER',boosts:'⚡ BOOSTS',enigma:'🎭 ENIGMA',ach:'🏅 ACHIEVEMENTS',ranks:'🏆 RANKS',mall:'🛍️ MALL',stake:'📈 STAKE',servers:'🌐 SERVERS',player:'👤 PLAYER',about:'ℹ️ ABOUT',contact:'📞 CONTACT'};
+var PG={gamehub:'🎲 GAME',game:'⚡ VICTOR COIN',shop:'🛒 SHOP',factory:'🏭 FACTORY',diamonds:'💎 DIAMONDS',daily:'🎁 DAILY',miner:'🤖 AUTO MINER',boosts:'⚡ BOOSTS',enigma:'🎭 ENIGMA',ach:'🏅 ACHIEVEMENTS',ranks:'🏆 RANKS',mall:'🏗️ VICTOR BUILD',stake:'📈 STAKE',servers:'🌐 SERVERS',player:'👤 PLAYER',about:'ℹ️ ABOUT',contact:'📞 CONTACT'};
 function go(id,el){
   document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('on');});
   document.querySelectorAll('.si').forEach(function(s){s.classList.remove('on');});
@@ -19,6 +19,7 @@ function go(id,el){
   if(id==='boosts')renderBoosts();
   if(id==='enigma')renderEnigma();
   if(id==='about'){if(typeof buildAboutPage==='function')buildAboutPage();}
+  if(id==='gamehub'){if(typeof renderGameHub==='function')renderGameHub();}
   renderAll();
 }
 function togSb(){var sb=document.getElementById('sb'),ov=document.getElementById('sbov');var o=sb.classList.toggle('open');ov.classList.toggle('show',o);}
