@@ -269,6 +269,10 @@ function buildPlayerData() {
     vault:      G.vault     || { items: [], active: {} },
     cosmetics:  G.cosmetics || {},
 
+    /* ── Game presence ──────────────────────────────────────────── */
+    currentGame:      (typeof _activeGame !== 'undefined' ? _activeGame : null),
+    currentGameStart: null,
+
     /* ── Timestamps (written server-side) ────────────────────── */
     lastSeen:   firebase.firestore.FieldValue.serverTimestamp()
   };
