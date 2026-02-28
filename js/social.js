@@ -129,6 +129,18 @@ function buildProfileCard(d, isSelf, showFriendBtn) {
     + ' likes'
     + (!isSelf ? '<button class="prof-likebtn" onclick="likePlayer(\''+d.email+'\')">❤️ Like</button>' : '')
     + '</div>'
+    // Rich Presence — show active game if playing
+    + (function() {
+        var gk = d.currentGame;
+        if (!gk) return '';
+        var gNames = {trivia:'Trivia 🤔', tictactoe:'Tic-Tac-Toe 🧩', emojiflip:'Emoji Flip 🃏'};
+        var gLabel = gNames[gk] || gk;
+        var since  = '';
+        if (d.currentGameStart && d.currentGameStart.toDate) {
+          since = ' · ' + timeAgo(d.currentGameStart.toDate());
+        }
+        return '<div class="profcard-playing">🎮 Playing <b>' + gLabel + '</b>' + since + '</div>';
+      })()
     // Action buttons
     + '<div class="profcard-acts">'
     + (isSelf ? '<button class="prof-act" onclick="openSettings()">⚙️ Settings</button>' : '')
@@ -662,4 +674,3 @@ function timeAgo(date) {
   if (sec < 86400)return Math.floor(sec/3600)+'h ago';
   return Math.floor(sec/86400)+'d ago';
 }
-
