@@ -389,16 +389,23 @@ function renderViewProfile(el,pic,badgePills,serverPill,myServer,scpStatus){
   var statLabel=statusLabels[statusKey]||'Online';
 
   el.innerHTML='<div class="pi-wrap">'
-    +'<div class="pi-av-row" style="padding-top:20px;">'
+    +'<div class="pi-av-row">'
+    +'<div class="pi-av-left">'
     +'<div class="pav-wrap-outer" onclick="if(typeof openStatusPicker===\'function\')openStatusPicker()" title="Change Status">'
-    +'<div class="pav-wrap" id="playerAvatarWrap">'+pic+'</div>'
+    +'<div class="pav-wrap pav-sm" id="playerAvatarWrap">'+pic+'</div>'
     +'<div class="status-dot-avatar" id="profileStatusDot" style="background:'+dotColor+';box-shadow:0 0 6px '+dotColor+'88;"></div>'
+    +'</div>'
+    +'<label class="pav-pencil" for="piPicInputMain" title="Change photo">✏️</label>'
+    +'<input type="file" id="piPicInputMain" accept="image/*" style="display:none;" onchange="setProfilePic(this)"/>'
     +'</div>'
     +'<div class="pi-av-nameblock">'
     +'<div class="pi-name">'+(G.name||'Player')+'</div>'
-    +'<div class="pi-handle">'+(G.name||'victorvk').toLowerCase().replace(/\s/g,'')+'</div>'
+    +'<div class="pi-handle">@'+(G.name||'victorvk').toLowerCase().replace(/\s/g,'')+'</div>'
+    +'<div class="pi-av-actions">'
+    +'<button class="pi-action-btn" onclick="toggleEditMode(true)">✏️ Edit Profile</button>'
+    +(G.bio?'':'<button class="pi-action-btn pi-action-bio" onclick="toggleEditMode(true)">+ Add Bio</button>')
     +'</div>'
-    +'<button class="pi-edit-btn-sm" onclick="toggleEditMode(true)">✏️ Edit</button>'
+    +'</div>'
     +'</div>'
     /* Status line */
     +'<div class="pi-status-line"><span class="pi-status-dot" style="background:'+dotColor+';"></span>'+statLabel+'</div>'
@@ -588,4 +595,4 @@ function buildAboutPage() {
 function toggleInfoSec(key) {
   _infoOpen[key] = !_infoOpen[key];
   buildAboutPage();
-    }
+                                  }
