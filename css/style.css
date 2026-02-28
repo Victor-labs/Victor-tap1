@@ -524,7 +524,7 @@ button,.si,.badge-pill,.soc-nb,.nt-buy-btn,.mall-buy-btn,.exnav-btn{
 
   /* ── PLAYER INFO ── */
   .pi-banner{display:none!important;}
-  .pav-wrap{width:58px!important;height:58px!important;}
+  .pav-wrap{width:46px!important;height:46px!important;}
   .pi-name{font-size:0.9rem!important;max-width:calc(100vw - 120px);}
   .pi-sub{font-size:0.6rem;}
   .pi-stats-grid{grid-template-columns:1fr 1fr!important;gap:6px!important;}
@@ -2435,19 +2435,49 @@ button,.si,.badge-pill,.soc-nb,.nt-buy-btn,.mall-buy-btn,.exnav-btn{
 .pi-banner{display:none;}
 .pi-av-row{
   display:flex;align-items:center;
-  padding:16px 16px 8px;margin-top:0;
+  padding:14px 16px 8px;margin-top:0;
   position:relative;z-index:1;gap:12px;
 }
+/* Left column: avatar + pencil stacked */
+.pi-av-left{
+  position:relative;display:inline-flex;
+  flex-direction:column;align-items:center;
+  gap:4px;flex-shrink:0;
+}
+/* Pencil button under avatar */
+.pav-pencil{
+  font-size:0.75rem;background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.15);border-radius:8px;
+  padding:3px 7px;cursor:pointer;color:var(--text2);
+  transition:background 0.15s;user-select:none;
+}
+.pav-pencil:hover{background:rgba(255,255,255,0.14);}
+/* Action buttons row under name */
+.pi-av-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+.pi-action-btn{
+  font-family:inherit;font-size:0.65rem;font-weight:700;
+  background:rgba(255,255,255,0.07);
+  border:1px solid rgba(255,255,255,0.14);
+  border-radius:8px;padding:5px 10px;
+  color:var(--text2);cursor:pointer;transition:all 0.15s;
+}
+.pi-action-btn:hover{background:rgba(255,255,255,0.13);color:var(--text);}
+.pi-action-bio{
+  border-color:rgba(90,200,250,0.25);color:var(--teal);
+  background:rgba(90,200,250,0.07);
+}
 .pav-wrap{
-  width:72px;height:72px;border-radius:50%;
+  width:46px;height:46px;border-radius:50%;
   background:rgba(255,255,255,0.1);
-  border:4px solid #0a0a0f;
+  border:3px solid #0a0a0f;
   display:flex;align-items:center;justify-content:center;
   overflow:hidden;flex-shrink:0;position:relative;
   cursor:pointer;transition:all 0.3s;
 }
+/* Small variant used on own profile view */
+.pav-sm{width:46px!important;height:46px!important;font-size:1.2rem!important;}
 .pav-wrap img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
-.pav-large{width:68px;height:68px;}
+.pav-large{width:60px;height:60px;}
 .pi-av-status{
   font-size:0.65rem;margin-bottom:6px;
 }
@@ -3626,4 +3656,3 @@ button,.si,.badge-pill,.soc-nb,.nt-buy-btn,.mall-buy-btn,.exnav-btn{
   font-size:0.72rem;color:var(--teal);
 }
 .profcard-playing b{color:var(--text);}
-
