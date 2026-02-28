@@ -108,10 +108,13 @@
       <div class="si enig" id="si-enigma" onclick="go('enigma',this)"><span class="sii">🎭</span><span class="sil">Enigma</span></div>
       <hr class="sbdiv"/>
 
+      <div class="si" id="si-gamehub" onclick="go('gamehub',this);renderGameHub();"><span class="sii">🎲</span><span class="sil">Game</span></div>
+      <hr class="sbdiv"/>
+
       <div class="sbs">PROGRESS</div>
       <div class="si" id="si-ach"     onclick="go('ach',this)"><span class="sii">🏅</span><span class="sil">Achievements</span><span class="sbbadge" id="achBadge">0/40</span></div>
       <div class="si" id="si-ranks"   onclick="go('ranks',this)"><span class="sii">🏆</span><span class="sil">Ranks</span></div>
-      <div class="si" id="si-mall"  onclick="go('mall',this)"><span class="sii">🛍️</span><span class="sil">Mall</span></div>
+      <div class="si" id="si-mall" onclick="go('mall',this)"><span class="sii">🏗️</span><span class="sil">Victor Build</span></div>
       <div class="si" id="si-stake" onclick="go('stake',this)"><span class="sii">📈</span><span class="sil">Stake</span></div>
       <hr class="sbdiv"/>
 
@@ -312,7 +315,10 @@
   <div id="rankList"></div>
 </div>
 
-<!-- MALL -->
+<!-- GAME HUB -->
+<div class="sec" id="pg-gamehub"></div>
+
+<!-- VICTOR BUILD -->
 <div class="sec" id="pg-mall">
 </div>
 
@@ -406,6 +412,10 @@
 <script src="js/vault.js"></script>
 <script src="js/status.js"></script>
 <script src="js/pwa.js"></script>
+<script src="js/game.js"></script>
+<script src="js/trivia.js"></script>
+<script src="js/tictactoe.js"></script>
+<script src="js/emojiflip.js"></script>
 <script src="js/main.js"></script>
 
 <!-- Login page particle canvas -->
@@ -458,4 +468,3 @@
 
 </body>
 </html>
-
