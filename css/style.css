@@ -1933,11 +1933,11 @@ button,.si,.badge-pill,.soc-nb,.nt-buy-btn,.mall-buy-btn,.exnav-btn{
   border-bottom:1px solid rgba(255,255,255,0.07);
 }
 .profcard-av{
-  width:66px;height:66px;border-radius:50%;flex-shrink:0;
+  width:48px;height:48px;border-radius:50%;flex-shrink:0;
   background:rgba(255,255,255,0.08);
   border:2px solid rgba(255,255,255,0.15);
   display:flex;align-items:center;justify-content:center;
-  overflow:hidden;font-size:2rem;position:relative;
+  overflow:hidden;font-size:1.4rem;position:relative;
 }
 .profcard-hinfo{flex:1;}
 .profcard-name{font-size:1rem;font-weight:800;letter-spacing:-0.2px;}
@@ -3452,4 +3452,178 @@ button,.si,.badge-pill,.soc-nb,.nt-buy-btn,.mall-buy-btn,.exnav-btn{
   50%     { transform: rotate(4deg);  }
 }
 /* The gift orbiter reuses existing .av-orbiter with 🎁 items */
+
+
+/* ── NOTIFICATION STYLES ──────────────────── */
+.soc-notif-dot{
+  display:inline-block;width:7px;height:7px;border-radius:50%;
+  background:#FF453A;position:absolute;top:4px;right:4px;
+  box-shadow:0 0 5px #FF453A88;
+}
+#snav-notifs{position:relative;}
+.notif-row{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05);
+  transition:background 0.15s;
+}
+.notif-row:last-child{border-bottom:none;}
+.notif-unread{background:rgba(90,200,250,0.06);}
+.notif-icon{font-size:1.3rem;flex-shrink:0;margin-top:1px;}
+.notif-body{flex:1;}
+.notif-msg{font-size:0.74rem;color:var(--text);line-height:1.5;}
+.notif-ts{font-size:0.62rem;color:var(--text3);margin-top:3px;}
+
+/* ═══════════════════════════════════════════════════
+   🎲 VICTOR GAME HUB
+═══════════════════════════════════════════════════ */
+.ghub-wrap{padding:16px;max-width:480px;margin:0 auto;}
+.ghub-header{margin-bottom:20px;}
+.ghub-title{font-size:1.4rem;font-weight:900;letter-spacing:-0.5px;margin-bottom:8px;}
+.ghub-greet{font-size:0.82rem;color:var(--text2);line-height:1.7;}
+.ghub-name{color:var(--gold);font-weight:800;}
+.ghub-sub{font-size:0.72rem;color:var(--text3);}
+
+.ghub-cards{display:flex;flex-direction:column;gap:12px;}
+.ghub-card{
+  display:flex;align-items:center;gap:14px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.09);
+  border-radius:16px;padding:16px;cursor:pointer;
+  transition:all 0.2s;
+}
+.ghub-card:hover,.ghub-card:active{
+  background:rgba(255,215,10,0.07);
+  border-color:rgba(255,215,10,0.25);
+  transform:translateX(3px);
+}
+.ghub-card-ico{font-size:2rem;flex-shrink:0;}
+.ghub-card-info{flex:1;}
+.ghub-card-title{font-size:0.95rem;font-weight:800;margin-bottom:3px;}
+.ghub-card-desc{font-size:0.68rem;color:var(--text3);line-height:1.5;}
+.ghub-card-arrow{font-size:0.8rem;color:var(--text3);}
+
+.ghub-closed{
+  display:flex;flex-direction:column;align-items:center;
+  padding:40px 20px;text-align:center;
+}
+.ghub-closed-ico{font-size:3.5rem;margin-bottom:12px;}
+.ghub-closed-title{font-size:1.3rem;font-weight:900;margin-bottom:10px;}
+.ghub-closed-msg{font-size:0.78rem;color:var(--text2);line-height:1.8;margin-bottom:16px;}
+.ghub-closed-time{font-size:0.72rem;color:var(--gold);font-weight:700;
+  background:rgba(255,215,10,0.08);padding:8px 16px;border-radius:20px;}
+
+/* ── Shared game UI ── */
+.game-wrap{padding:14px;}
+.game-title{font-size:1.2rem;font-weight:900;margin:8px 0 14px;text-align:center;}
+.game-back-btn{
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+  border-radius:10px;padding:7px 14px;font-size:0.72rem;color:var(--text2);
+  cursor:pointer;margin-bottom:8px;font-family:inherit;
+}
+.game-retry-btn{
+  background:linear-gradient(135deg,var(--gold),#FF9F0A);
+  border:none;border-radius:12px;padding:10px 24px;
+  font-size:0.82rem;font-weight:800;color:#000;cursor:pointer;
+  margin-top:12px;font-family:inherit;
+}
+.game-end{
+  display:flex;flex-direction:column;align-items:center;
+  padding:24px 0;text-align:center;
+}
+.game-end-ico{font-size:3rem;margin-bottom:8px;}
+.game-end-title{font-size:1.1rem;font-weight:900;margin-bottom:12px;}
+.game-end-row{font-size:0.78rem;color:var(--text2);margin-bottom:4px;}
+
+/* ── 🤔 TRIVIA ── */
+.triv-diff-row{display:flex;gap:8px;margin-bottom:14px;}
+.triv-diff{
+  flex:1;padding:8px;border-radius:10px;font-family:inherit;font-size:0.72rem;
+  font-weight:700;border:1px solid rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.04);color:var(--text2);cursor:pointer;
+}
+.triv-diff-on{background:rgba(255,215,10,0.15);border-color:rgba(255,215,10,0.4);color:var(--gold);}
+
+.triv-meta{
+  display:flex;justify-content:space-between;font-size:0.65rem;
+  color:var(--text3);margin-bottom:12px;flex-wrap:wrap;gap:4px;
+}
+.triv-q{
+  font-size:0.9rem;font-weight:700;line-height:1.6;margin-bottom:16px;
+  background:rgba(255,255,255,0.04);border-radius:12px;padding:14px;
+}
+.triv-opts{display:flex;flex-direction:column;gap:9px;}
+.triv-opt{
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+  border-radius:12px;padding:12px 16px;font-family:inherit;font-size:0.8rem;
+  color:var(--text);cursor:pointer;text-align:left;transition:all 0.15s;
+}
+.triv-opt:hover:not(:disabled){background:rgba(90,200,250,0.1);border-color:rgba(90,200,250,0.3);}
+.triv-opt-right{background:rgba(48,209,88,0.15)!important;border-color:var(--green)!important;color:var(--green)!important;}
+.triv-opt-wrong{background:rgba(255,69,58,0.15)!important;border-color:var(--red)!important;color:var(--red)!important;}
+.triv-fb{min-height:36px;margin-top:12px;text-align:center;}
+.triv-correct{color:var(--green);font-weight:700;font-size:0.85rem;}
+.triv-wrong{color:var(--red);font-weight:700;font-size:0.85rem;}
+
+/* ── 🧩 TIC-TAC-TOE ── */
+.ttt-diff-row{display:flex;gap:8px;margin-bottom:12px;}
+.ttt-diff{
+  flex:1;padding:8px;border-radius:10px;font-family:inherit;font-size:0.68rem;
+  font-weight:700;border:1px solid rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.04);color:var(--text2);cursor:pointer;
+}
+.ttt-diff-on{background:rgba(255,69,58,0.15);border-color:rgba(255,69,58,0.4);color:var(--red);}
+
+.ttt-stats-row{display:flex;justify-content:space-between;font-size:0.65rem;
+  color:var(--text3);margin-bottom:14px;flex-wrap:wrap;gap:4px;}
+.ttt-stat{color:var(--text2);}
+
+.ttt-board{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+  max-width:240px;margin:0 auto 14px;
+}
+.ttt-cell{
+  aspect-ratio:1;border-radius:12px;
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.8rem;font-weight:900;cursor:pointer;transition:all 0.15s;
+}
+.ttt-cell:hover:not(.ttt-x):not(.ttt-o){background:rgba(255,255,255,0.1);}
+.ttt-x{color:#5AC8FA;border-color:rgba(90,200,250,0.3);}
+.ttt-o{color:#FF453A;border-color:rgba(255,69,58,0.3);}
+.ttt-msg{text-align:center;font-size:1rem;font-weight:800;min-height:30px;margin-bottom:6px;}
+.ttt-win{color:var(--green);}
+.ttt-lose{color:var(--red);}
+.ttt-draw{color:var(--gold);}
+
+/* ── 🃏 EMOJI FLIP ── */
+.ef-stats-row{display:flex;justify-content:space-around;font-size:0.7rem;
+  color:var(--text3);margin-bottom:14px;}
+.ef-stat b{color:var(--text);}
+.ef-prompt{text-align:center;font-size:0.88rem;font-weight:700;margin-bottom:16px;
+  min-height:28px;line-height:1.5;}
+.ef-target{font-size:1.3rem;}
+.ef-cards{display:flex;justify-content:center;gap:14px;margin-bottom:16px;}
+.ef-card{
+  width:80px;height:100px;border-radius:14px;
+  background:rgba(255,255,255,0.05);border:2px solid rgba(255,255,255,0.12);
+  display:flex;align-items:center;justify-content:center;
+  font-size:2.2rem;cursor:pointer;transition:all 0.3s;
+  user-select:none;
+}
+.ef-face-up{background:rgba(255,215,10,0.1);border-color:rgba(255,215,10,0.35);}
+.ef-card:hover:not(.ef-face-up){background:rgba(90,200,250,0.08);border-color:rgba(90,200,250,0.3);}
+.ef-card-correct{background:rgba(48,209,88,0.15)!important;border-color:var(--green)!important;}
+.ef-card-wrong{background:rgba(255,69,58,0.15)!important;border-color:var(--red)!important;}
+.ef-feedback{text-align:center;min-height:40px;}
+.ef-correct{color:var(--green);font-weight:700;}
+.ef-wrong{color:var(--red);font-weight:700;}
+
+/* ── Rich Presence on profile card ── */
+.profcard-playing{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 16px;background:rgba(90,200,250,0.07);
+  border-bottom:1px solid rgba(90,200,250,0.12);
+  font-size:0.72rem;color:var(--teal);
+}
+.profcard-playing b{color:var(--text);}
 
