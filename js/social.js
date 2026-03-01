@@ -127,13 +127,18 @@ function buildProfileCard(d, isSelf, showFriendBtn) {
     + '<span style="font-size:1.1rem;">❤️</span>'
     + '<span class="profcard-likecount" id="likeCount_'+(d.email||'')+'">'+(d.likes||0)+'</span>'
     + ' likes'
-    + (!isSelf ? '<button class="prof-likebtn" onclick="likePlayer(\''+d.email+'\')">❤️ Like</button>' : '')
+    + (function(){
+        if(isSelf) return '';
+        var liked = G.likedProfiles && G.likedProfiles.indexOf(d.email||'')>=0;
+        var dis = liked?' disabled style="opacity:0.45;cursor:default;"':'';
+        return '<button class="prof-likebtn"'+dis+' onclick="likePlayer(\''+( d.email||'')+'\')">'+(liked?'❤️ Liked':'❤️ Like')+'</button>';
+      })()
     + '</div>'
     // Rich Presence — show active game if playing
     + (function() {
         var gk = d.currentGame;
         if (!gk) return '';
-        var gNames = {trivia:'Trivia 🤔', tictactoe:'Tic-Tac-Toe 🧩', emojiflip:'Emoji Flip 🃏'};
+        var gNames = {trivia:'Trivia 🤔', tictactoe:'Tic-Tac-Toe 🧩', emojiflip:'Emoji Flip 🃏', hangman:'Hangman 🥏', squidgame:'Squid Game 🖲', karaoke:'Karaoke 🎤'};
         var gLabel = gNames[gk] || gk;
         var since  = '';
         if (d.currentGameStart && d.currentGameStart.toDate) {
@@ -168,11 +173,24 @@ function saveBio() {
 }
 
 function likePlayer(email) {
+  if (!email) return;
   fbLikePlayer(email, function(res) {
-    if (res.error) { toast(res.error,'#FF453A'); return; }
+    if (res.error) {
+      if (res.error === 'Already liked') toast('You already liked this profile ❤️','#FF9F0A');
+      else toast('❌ '+res.error,'#FF453A');
+      return;
+    }
     toast('❤️ Liked!','#FF2D55');
+    // Update count in UI
     var el = document.getElementById('likeCount_'+email);
     if (el) el.textContent = parseInt(el.textContent||0)+1;
+    // Disable the like button
+    document.querySelectorAll('.prof-likebtn').forEach(function(btn){
+      btn.disabled = true;
+      btn.textContent = '❤️ Liked';
+      btn.style.opacity = '0.45';
+      btn.style.cursor  = 'default';
+    });
   });
 }
 
@@ -440,237 +458,4 @@ function renderFriends(body) {
           if (!b) return;
           b.innerHTML = '<div style="padding:16px;">'
             + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">'
-            + '<div class="soc-sec-title" style="margin:0;">👥 Friends <span style="font-size:0.65rem;color:var(--text3);">('+friends.length+'/50)</span></div>'
-            + '</div>'
-            // Pending requests
-            + (reqs.length ? '<div class="fr-section">📨 Pending Requests</div>'
-              + reqs.map(function(r){
-                return '<div class="fr-row">'
-                  +'<div class="fr-av">'+r.from.charAt(0).toUpperCase()+'</div>'
-                  +'<div class="fr-info"><div class="fr-name">'+r.from+'</div>'
-                  +'<div class="fr-sub">Wants to be friends</div></div>'
-                  +'<div style="display:flex;gap:6px;">'
-                  +'<button class="fr-btn fr-acc" onclick="acceptFriend(\''+r.fromEmail+'\')">✓</button>'
-                  +'<button class="fr-btn fr-dec" onclick="declineFriend(\''+r.fromEmail+'\')">✕</button>'
-                  +'</div></div>';
-              }).join('') : '')
-            // Friends list
-            + (friends.length
-              ? '<div class="fr-section">Your Friends</div>'
-                + friends.map(function(f) {
-                  var online = f.online;
-                  var fsk = f.status || (online ? 'online' : 'offline');
-                  var fIcons  = {online:'🟢',idle:'🌙',dnd:'🔴',invisible:'⚫',offline:'⚫'};
-                  var fLabels = {online:'Online',idle:'Idle',dnd:'Do Not Disturb',invisible:'Offline',offline:'Offline'};
-                  var fDisplay = fsk==='invisible' ? '⚫ Offline' : (fIcons[fsk]||'🟢')+' '+(fLabels[fsk]||'Online');
-                  var pic = f.profilePic
-                    ? '<img src="'+f.profilePic+'" class="fr-av" style="object-fit:cover;"/>'
-                    : '<div class="fr-av">'+((f.name||'?').charAt(0).toUpperCase())+'</div>';
-                  return '<div class="fr-row">'
-                    + pic
-                    + '<div class="fr-info">'
-                    + '<div class="fr-name">'+( f.name||'Unknown')+'</div>'
-                    + '<div class="fr-sub '+(online&&fsk!=='invisible'?'fr-online':'')+'">'+fDisplay+'</div>'
-                    + '</div>'
-                    + '<div style="display:flex;gap:6px;">'
-                    + '<button class="fr-btn" onclick="showPlayerCard(\''+f.email+'\')">👤</button>'
-                    + '<button class="fr-btn fr-dec" onclick="confirmUnfriend(\''+f.email+'\',\''+f.name+'\')">Remove</button>'
-                    + '</div></div>';
-                }).join('')
-              : '<div class="soc-empty">No friends yet.<br/>Search for players and add them!</div>')
-            + '</div>';
-        });
-    });
-  });
-}
-
-function sendFriendReq(name) {
-  if (friends && friends.length >= 50) { toast('Friend limit reached (50)','#FF9F0A'); return; }
-  fbSendFriendReq(name, function(res) {
-    if (res.error) { toast('❌ '+res.error,'#FF453A'); return; }
-    toast('👥 Friend request sent to '+name+'!','#5AC8FA');
-  });
-}
-
-function acceptFriend(email) {
-  fbAcceptFriendReq(email, function(res) {
-    if (res.error) { toast('Error: '+res.error,'#FF453A'); return; }
-    toast('✅ Friend added!','#30D158');
-    renderFriends(document.getElementById('socBody'));
-  });
-}
-
-function declineFriend(email) {
-  fbReady(function() {
-    _db.collection('friendRequests')
-      .doc(playerDocId(email)+'_'+playerDocId(G.email))
-      .update({status:'declined'})
-      .then(function(){ renderFriends(document.getElementById('socBody')); });
-  });
-}
-
-function confirmUnfriend(email, name) {
-  var ov = document.createElement('div');
-  ov.className = 'mov';
-  ov.innerHTML = '<div class="mb"><span class="mico">👥</span>'
-    +'<div class="mttl">Unfriend '+name+'?</div>'
-    +'<div class="mbdy">This will remove them from your friends list.</div>'
-    +'<div class="mbts">'
-    +'<button class="mok" style="background:var(--red);" onclick="doUnfriend(\''+email+'\');this.closest(\'.mov\').remove()">Unfriend</button>'
-    +'<button class="mcan" onclick="this.closest(\'.mov\').remove()">Cancel</button>'
-    +'</div></div>';
-  document.body.appendChild(ov);
-}
-
-function doUnfriend(email) {
-  fbUnfriend(email, function(res) {
-    if (res.error) { toast('Error','#FF453A'); return; }
-    toast('Removed from friends','#FF9F0A');
-    renderFriends(document.getElementById('socBody'));
-  });
-}
-
-/* ═══════════════════════════════════════
-   NOTIFICATIONS TAB
-═══════════════════════════════════════ */
-var _notifTabUnsub = null;
-
-function renderNotificationsTab(body) {
-  body.innerHTML = '<div style="padding:16px;">'
-    + '<div class="soc-sec-title">🔔 Notifications</div>'
-    + '<div id="notifList"><div class="soc-loading">Loading…</div></div>'
-    + '</div>';
-  if (_notifTabUnsub) { _notifTabUnsub(); _notifTabUnsub = null; }
-  var myDocId = typeof _myDocId === 'function' ? _myDocId() : playerDocId(G.email);
-  if (!myDocId) {
-    document.getElementById('notifList').innerHTML = '<div class="soc-empty">Log in to see notifications.</div>';
-    return;
-  }
-  var cutoff = Date.now() - 5 * 24 * 60 * 60 * 1000;
-  fbReady(function() {
-    _notifTabUnsub = _db.collection('players').doc(myDocId)
-      .collection('notifications')
-      .orderBy('ts', 'desc').limit(50)
-      .onSnapshot(function(snap) {
-        var el = document.getElementById('notifList');
-        if (!el) return;
-        var notifs = [];
-        var toDelete = [];
-        snap.forEach(function(d) {
-          var data = d.data();
-          var ts = data.ts && data.ts.toMillis ? data.ts.toMillis() : 0;
-          if (ts > 0 && ts < cutoff) { toDelete.push(d.ref); }
-          else { notifs.push({ id: d.id, ref: d.ref, data: data, ts: ts }); }
-        });
-        if (toDelete.length) {
-          var batch = _db.batch();
-          toDelete.forEach(function(ref) { batch.delete(ref); });
-          batch.commit().catch(function(){});
-        }
-        var unread = notifs.filter(function(n){ return !n.data.read; });
-        if (unread.length) {
-          var batch2 = _db.batch();
-          unread.forEach(function(n){ batch2.update(n.ref, {read:true}); });
-          batch2.commit().catch(function(){});
-          var dot = document.getElementById('socNotifDot');
-          if (dot) dot.style.display = 'none';
-        }
-        if (!notifs.length) {
-          el.innerHTML = '<div class="soc-empty">No notifications yet.</div>';
-          return;
-        }
-        var typeIcons = {gift:'🎁',like:'❤️',friendRequest:'👥',profileView:'👀',system:'📢'};
-        el.innerHTML = notifs.map(function(n) {
-          var d = n.data;
-          var icon = typeIcons[d.type] || '🔔';
-          var tsStr = n.ts ? timeAgo(new Date(n.ts)) : '';
-          return '<div class="notif-row ' + (d.read ? '' : 'notif-unread') + '">'
-            + '<div class="notif-icon">' + icon + '</div>'
-            + '<div class="notif-body">'
-            + '<div class="notif-msg">' + (d.message || '') + '</div>'
-            + '<div class="notif-ts">' + tsStr + '</div>'
-            + '</div></div>';
-        }).join('');
-      }, function() {
-        var el = document.getElementById('notifList');
-        if (el) el.innerHTML = '<div class="soc-empty">Could not load notifications.</div>';
-      });
-  });
-}
-
-function updateSocNotifDot(count) {
-  var dot = document.getElementById('socNotifDot');
-  if (dot) dot.style.display = count > 0 ? 'inline-block' : 'none';
-}
-
-/* ═══════════════════════════════════════
-   SETTINGS
-═══════════════════════════════════════ */
-function openSettings() {
-  var ex = document.getElementById('settingsOverlay');
-  if (ex) { ex.remove(); return; }
-  if (!G.settings) G.settings = {anonymous:false, notifications:true};
-  var ov = document.createElement('div');
-  ov.id = 'settingsOverlay';
-  ov.className = 'mov';
-  ov.innerHTML = '<div class="mb" style="max-width:340px;">'
-    +'<div class="mttl">⚙️ Settings</div>'
-    +'<div class="set-list">'
-    // Anonymous
-    +'<div class="set-row">'
-    +'<div><div class="set-name">🎭 Anonymous Mode</div>'
-    +'<div class="set-desc">Hides your name on leaderboard & profile</div></div>'
-    +'<div class="tog-wrap" onclick="toggleSetting(\'anonymous\')">'
-    +'<div class="tog '+(G.settings.anonymous?'tog-on':'')+'" id="tog-anonymous"></div>'
-    +'</div></div>'
-    // Notifications
-    +'<div class="set-row">'
-    +'<div><div class="set-name">🔔 Notifications</div>'
-    +'<div class="set-desc">Likes, gifts, friend requests, profile views</div></div>'
-    +'<div class="tog-wrap" onclick="toggleSetting(\'notifications\')">'
-    +'<div class="tog '+(G.settings.notifications?'tog-on':'')+'" id="tog-notifications"></div>'
-    +'</div></div>'
-    // Logout
-    +'<div class="set-row" style="margin-top:6px;">'
-    +'<div><div class="set-name">🚪 Logout</div>'
-    +'<div class="set-desc">Returns you to the login screen</div></div>'
-    +'<button class="set-logout" onclick="doLogout()">Logout</button>'
-    +'</div>'
-    +'</div>'
-    +'<div class="mbts"><button class="mcan" onclick="document.getElementById(\'settingsOverlay\').remove()">Close</button></div>'
-    +'</div>';
-  document.body.appendChild(ov);
-}
-
-function toggleSetting(key) {
-  if (!G.settings) G.settings = {anonymous:false,notifications:true};
-  G.settings[key] = !G.settings[key];
-  var tog = document.getElementById('tog-'+key);
-  if (tog) tog.classList.toggle('tog-on', G.settings[key]);
-  sv();
-  fbReady(function(){
-    var upd = {};
-    upd[key] = G.settings[key];
-    _db.collection('players').doc(playerDocId(G.email)).update(upd).catch(function(){});
-  });
-  toast((G.settings[key]?'✅ ':'❌ ')+key+' '+(G.settings[key]?'enabled':'disabled'),'#5AC8FA');
-}
-
-function doLogout() {
-  fbSetOffline();
-  sv();
-  document.getElementById('settingsOverlay') && document.getElementById('settingsOverlay').remove();
-  document.getElementById('socialOverlay')   && document.getElementById('socialOverlay').remove();
-  document.getElementById('app').style.display  = 'none';
-  document.getElementById('lp').style.display   = 'flex';
-  toast('👋 Logged out','#5AC8FA');
-}
-
-/* ── HELPERS ── */
-function timeAgo(date) {
-  var sec = Math.floor((Date.now()-date.getTime())/1000);
-  if (sec < 60)   return 'just now';
-  if (sec < 3600) return Math.floor(sec/60)+'m ago';
-  if (sec < 86400)return Math.floor(sec/3600)+'h ago';
-  return Math.floor(sec/86400)+'d ago';
-}
+            + '<div class="soc-sec-tit
