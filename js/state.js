@@ -52,7 +52,7 @@ var G={
   server:{id:null,scp:0,lastClaim:0},
 
   /* Social */
-  friendCount:0, giftCount:0, lbViews:0, likes:0,
+  friendCount:0, giftCount:0, lbViews:0, likes:0, likedProfiles:[], likesGiven:0,
 
   /* Profile */
   profilePic:null, bio:'', joinedAt:0, bioChanges:0,
@@ -73,7 +73,10 @@ var G={
   badges:[],
 
   /* Status */
-  status:'online'
+  status:'online',
+
+  /* Games */
+  gameStreak20:false, playedSquid:false, squidWin5:false, gameMins:0, gameStartTs:0
 };
 
 /* ── SAFE SAVE ── */
@@ -224,4 +227,3 @@ function fmT(s){
 }
 function st(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
 function sth(id,v){var e=document.getElementById(id);if(e)e.innerHTML=v;}
-
