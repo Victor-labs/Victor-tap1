@@ -19,6 +19,27 @@ var BADGE_DEFS = [
     desc:'One of the first 100 players',
     color:'#FFD60A', manual:true
   },
+  {
+    id:'nothorses',  name:'Not Horses',          emoji:'🎖', rarity:'special',
+    desc:'Win 5 rounds of Squid Game',
+    color:'#FF2D55',
+    condition:function(g){ return !!g.squidWin5; }
+  },
+  {
+    id:'titlegifted', name:'Title Gifted',       emoji:'🎀', rarity:'special',
+    desc:'Receive 100 gifts from different users',
+    color:'#BF5AF2',
+    condition:function(g){ return g.giftCount && g.giftCount >= 100; }
+  },
+  {
+    id:'clockit',   name:'Clock It',             emoji:'👌', rarity:'special',
+    desc:'Have 3 name template effects',
+    color:'#5AC8FA',
+    condition:function(g){
+      if(!g.vault||!g.vault.items) return false;
+      return g.vault.items.filter(function(id){return id.indexOf('nt_')===0;}).length>=3;
+    }
+  },
 
   /* ──────────── COMMON ──────────── */
   {
@@ -344,5 +365,5 @@ function animateBadgeParticles(containerId){
     dot.style.animationDuration=(1.8+Math.random()*2)+'s';
     el.appendChild(dot);
   }
-}
-
+                                                                     }
+     
