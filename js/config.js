@@ -147,37 +147,74 @@ var ACHS=[
   {n:'Vic.collector',         e:'🎒', c:'Have 20 items in vault',               f:function(g){return g.ex&&g.ex.vault&&g.ex.vault.length>=20;}},
   {n:'Life of a sim',    e:'🛍️', c:'Buy your first item in the Mall',    f:function(g){return g.vault&&g.vault.items&&g.vault.items.length>=1;}, reward:{dia:5}},
   {n:'Premium feel',     e:'🌟', c:'Buy your first profile particle',     f:function(g){return g.vault&&g.vault.items&&g.vault.items.some(function(id){return id.indexOf('ptc_')===0;});}},
-  {n:'SCP synced',       e:'🌐', c:'Join a Victor Server',                f:function(g){return g.server&&!!g.server.id;}}
+  {n:'SCP synced',       e:'🌐', c:'Join a Victor Server',                f:function(g){return g.server&&!!g.server.id;}},
+  /* ── GAME ACHIEVEMENTS ── */
+  {n:'Streak Expert',     e:'😌', c:'Get a 20-streak in any game',             f:function(g){return !!g.gameStreak20;}},
+  {n:'Red Light, Green Light',e:'🎠',c:'Play Squid Game',                     f:function(g){return !!g.playedSquid;}},
+  {n:'Vic Time',          e:'⏰', c:'Spend 20 minutes on any game',            f:function(g){return !!(g.gameMins&&g.gameMins>=20);}},
+  {n:'Flagged a Liker',   e:'🏁', c:'Like 10 profiles',                        f:function(g){return !!(g.likesGiven&&g.likesGiven>=10);}},
 ];
-/* ── ACH CATEGORIES for collapsible display ── */
+/* ── ACH CATEGORIES — flat, always visible ── */
 var ACH_CATS = [
   {
     key:'tapping', label:'⚡ Tapping', emoji:'⚡',
-    ids:['First Tap','Speed Fingers','10K Club','100K Club','1M Club','Business Minds','Banked','Welcome to tapping society','Bot orders']
+    ids:[
+      'Click Bait','Cold Tapper','Fury Tap','Hero','Mr. VK','Cashier',
+      'VK Master','Welcome to tapping society','Brother Vic',
+      'Tornado','Banked','Bot orders','Business Minds'
+    ]
   },
   {
-    key:'currency', label:'💎 Currency', emoji:'💎',
-    ids:['Mined!','Diamond Fever','Diamond Hoarder','Tycoon','Lights On','Ruaushi','Star & Moon','Master of Currency','Ranger']
+    key:'mining', label:'💎 Mining & Currency', emoji:'💎',
+    ids:[
+      'Farmer','Hunter','Ranger','Master of Currency',
+      'Tycoon','Cash Master','Dedicated Collector','Daily Regulars',
+      'Night Owl','Steady Rhythm'
+    ]
+  },
+  {
+    key:'industries', label:'🏭 Industries', emoji:'🏭',
+    ids:[
+      'Organizer','Entrepreneur','Lights On',
+      'Winter Time','Santa','Hell Bent','Son of Darkness',
+      'Ruaushi','Star & Moon'
+    ]
   },
   {
     key:'exploration', label:'🗺️ Exploration', emoji:'🗺️',
-    ids:['Scavenger Hunt','Tomber','Detective Vic','Wormhole','The hunt begins','Vic.player','All roads are Vic roads','OK the vault is open','Vic.collector','Light bringer']
-  },
-  {
-    key:'staking', label:'📈 Staking', emoji:'📈',
-    ids:['master staker','Nightmares','Staking like a pro','SCP synced']
+    ids:[
+      'The hunt begins','Tomber','Wormhole','Detective Vic',
+      'Vic.player','All roads are Vic roads',
+      'Scavenger Hunt','Light bringer','OK the vault is open','Vic.collector'
+    ]
   },
   {
     key:'build', label:'🏠 Build', emoji:'🏠',
     ids:['Homeowner','Vic.Builder','Safe House','Rainy Days','Mod.Vic']
   },
   {
-    key:'industries', label:'🏭 Industries', emoji:'🏭',
-    ids:['Enigmared','Enigmatic','Vic loves malls','Premium feel']
+    key:'mall', label:'🏗️ Mall', emoji:'🏗️',
+    ids:['Life of a sim','Premium feel','Vic loves malls']
+  },
+  {
+    key:'enigma', label:'🎭 Enigma', emoji:'🎭',
+    ids:['Enigmared','Enigmatic','Evil Grin']
+  },
+  {
+    key:'staking', label:'📈 Staking', emoji:'📈',
+    ids:['master staker','Staking like a pro','Nightmares','SCP synced']
   },
   {
     key:'social', label:'🌐 Social', emoji:'🌐',
-    ids:['My mood','No stopping me','Connect to the world I','Connect to the world II','Connect to the world III','Lone star','Superstar']
+    ids:[
+      'My mood','No stopping me',
+      'Connect to the world I','Connect to the world II','Connect to the world III',
+      'Lone star','Superstar','Flagged a Liker'
+    ]
+  },
+  {
+    key:'games', label:'🎮 Games', emoji:'🎮',
+    ids:['Streak Expert','Red Light, Green Light','Vic Time']
   }
 ];
-
+    
