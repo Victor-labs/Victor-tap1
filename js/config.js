@@ -5,6 +5,7 @@ document.addEventListener('keydown',function(e){
 });
 
 /* BG — cycling spotlight + colored particles */
+try {
 (function(){
   function _startBg(){
     var cv=document.getElementById('bgC');
@@ -81,6 +82,8 @@ document.addEventListener('keydown',function(e){
   } // end _startBg
   _startBg();
 })();
+} catch(_bgErr) { console.warn("BG canvas init failed:", _bgErr.message); }
+
 
 /* DATA */
 var TP=[{r:1,c:5000,d:0},{r:3,c:25000,d:0},{r:6,c:80000,d:0},{r:9,c:200000,d:0},
@@ -230,4 +233,4 @@ var ACH_CATS = [
     ids:['Streak Expert','Red Light, Green Light','Vic Time']
   }
 ];
-  
+   
