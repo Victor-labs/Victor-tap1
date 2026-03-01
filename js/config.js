@@ -6,7 +6,18 @@ document.addEventListener('keydown',function(e){
 
 /* BG — cycling spotlight + colored particles */
 (function(){
-  var cv=document.getElementById('bgC'),cx=cv.getContext('2d');
+  function _startBg(){
+    var cv=document.getElementById('bgC');
+    if(!cv||!cv.getContext){
+      // bgC not ready yet — retry after DOM is loaded
+      if(document.readyState==='loading'){
+        document.addEventListener('DOMContentLoaded',_startBg);
+      } else {
+        setTimeout(_startBg,200);
+      }
+      return;
+    }
+    var cx=cv.getContext('2d');
   var W,H,ok=true,S=[],P=[],L=[],NB=[];
   // Spotlight cycling colours: gold, blue, green, red, orange, purple
   var SPOT_COLS=[[45,90,55],[210,85,65],[140,75,55],[0,80,60],[28,90,60],[270,75,60]];
@@ -67,6 +78,8 @@ document.addEventListener('keydown',function(e){
       cx.beginPath();cx.arc(p.x,p.y,p.r,0,6.28);
       cx.fillStyle='rgba('+rc[0]+','+rc[1]+','+rc[2]+','+al+')';cx.fill();});
   })();
+  } // end _startBg
+  _startBg();
 })();
 
 /* DATA */
