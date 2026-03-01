@@ -16,6 +16,43 @@
 <link rel="stylesheet" href="css/style.css"/>
 </head>
 <body>
+<!-- CRITICAL: doLogin inline — zero dependencies, works even if other scripts fail -->
+<script>
+function doLogin() {
+  var n = document.getElementById('lname')  ? document.getElementById('lname').value.trim()  : '';
+  var e = document.getElementById('lemail') ? document.getElementById('lemail').value.trim() : '';
+
+  // Only name is required. Email is OPTIONAL — anonymous users leave it blank.
+  if (!n) { alert('Please enter your name.'); return; }
+  if (e && e.indexOf('@') === -1) { alert('Please enter a valid email or leave blank for anonymous play.'); return; }
+
+  // Save to localStorage directly — no dependency on G or sv()
+  try {
+    var saved = localStorage.getItem('vcg_v10');
+    var data  = saved ? JSON.parse(saved) : {};
+    data.name   = data.name  || n;
+    if (e) data.email = data.email || e;
+    data.logins = (data.logins || 0) + 1;
+    localStorage.setItem('vcg_v10', JSON.stringify(data));
+  } catch(x) {}
+
+  // Hide login, show app — cssText with !important beats any CSS rule
+  var lp  = document.getElementById('lp');
+  var app = document.getElementById('app');
+  if (lp)  lp.style.cssText = 'display:none!important;visibility:hidden!important;';
+  if (app) { app.style.display = 'flex'; app.style.opacity = '1'; }
+
+  // Init game safely after short delay
+  setTimeout(function() {
+    try { if (typeof G !== 'undefined') { if (!G.name) G.name = n; if (!G.email && e) G.email = e; } } catch(x) {}
+    try { if (typeof initGame     === 'function') initGame();     } catch(x) { console.warn('initGame:', x); }
+    try { if (typeof initFirebase === 'function') initFirebase(); } catch(x) {}
+    try { if (typeof sv           === 'function') sv();           } catch(x) {}
+    try { if (typeof window._tryFbLoad === 'function') window._tryFbLoad(); } catch(x) {}
+  }, 150);
+}
+</script>
+
 
 <canvas id="bgC"></canvas>
 
@@ -55,7 +92,7 @@
       <div class="lcard-inner">
         <div class="lcard-title">ENTER THE REALM</div>
         <input class="linp" id="lname"  placeholder="Your Name"      type="text"  autocomplete="off" onkeydown="if(event.key==='Enter')document.getElementById('lemail').focus()"/>
-        <input class="linp" id="lemail" placeholder="Email Address"  type="email" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()"/>
+        <input class="linp" id="lemail" placeholder="Email (optional — leave blank for anonymous)"  type="email" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()"/>
         <button class="lbtn" onclick="doLogin()">
           <span class="lbtn-orn">❖</span>
           <span class="lbtn-txt">BEGIN JOURNEY</span>
@@ -295,7 +332,3 @@
 <!-- ENIGMA -->
 <div class="sec" id="pg-enigma">
   <div class="ehdr"><span class="emask">🎭</span><div class="etitle">ENIGMA</div><div class="esub">HIDDEN POWER · PAY TO REVEAL</div></div>
-  <p class="sd" style="text-align:center;">Three ancient skills sealed behind 1,000,000 VK each.</p>
-  <div class="enc" id="en0"><div class="elk" id="el0"><span class="elik">🔒</span><div class="eln">SEALED SKILL I</div><div class="elh">A power that multiplies your every tap…</div><div class="elc">Unlock cost: 1,000,000 VK</div><button class="eubtn" id="eu0" onclick="unlockE(0)">PAY TO REVEAL</button></div><div class="erb" id="er0" style="display:none;"><div class="ert"><div class="erico">🛡️</div><div class="eri"><div class="ern">BUFF CONTROL</div><div class="erd">+2 VK per tap. Active until you deactivate it.</div><div class="ertm ton" id="et0"></div></div></div><div class="erbs" id="ebs0"></div></div></div>
-  <div class="enc" id="en1"><div class="elk" id="el1"><span class="elik">🔒</span><div class="eln">SEALED SKILL II</div><div class="elh">A cosmic influence over the mines…</div><div class="elc">Unlock cost: 1,000,000 VK</div><button class="eubtn" id="eu1" onclick="unlockE(1)">PAY TO REVEAL</button></div><div class="erb" id="er1" style="display:none;"><div class="ert"><div class="erico">🌌</div><div class="eri"><div class="ern">CELESTIAL</div><div class="erd">Always mine 100 💎 per tap. Active until deactivated.</div><div class="ertm ton" id="et1"></div></div></div><div class="erbs" id="ebs1"></div></div></div>
-  <div class="enc" id="en2"><div class="elk" id="el2"><span class="elik">🔒</span><div class="eln">SEALED SKILL III</div><div class="elh">A magnetic force that draws experience…</div><div class="elc">Unlock cost: 1,000,000 VK</div><button class="eubtn" id="eu2" onclick="unlockE(2)">PAY TO REVEAL</button></div><div class="erb" id="er2" style="display:none;"><div class="ert"><div class="erico">🧲</div><div class="eri"><div class="ern">XP MAGNET</div><div class="erd">+10% VK per tap for 20 seconds. 50-h
