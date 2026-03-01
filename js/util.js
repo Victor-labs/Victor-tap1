@@ -46,6 +46,142 @@ function renderAch(){
   st('achProg', done+'/'+ACHS.length);
 
   if(typeof ACH_CATS==='undefined'){renderAchFlat(el);return;}
+
+  /* Track which achievements have been shown to avoid duplicates */
+  var shown={};
+  var h='';
+
+  ACH_CATS.forEach(function(cat){
+    var catAchs=ACHS.filter(function(a){
+      return cat.ids.indexOf(a.n)!==-1 && !shown[a.n];
+    });
+    if(!catAchs.length) return;
+
+    var catDone=catAchs.filter(function(a){
+      var idx=ACHS.indexOf(a); return idx>=0&&G.ach[idx];
+    }).length;
+
+    h+='<div class="ach-section">'
+      +'<div class="ach-section-hdr">'
+      +'<span class="ach-section-ico">'+cat.emoji+'</span>'
+      +'<span class="ach-section-name">'+cat.label+'</span>'
+      +'<span class="ach-section-cnt">'+catDone+'/'+catAchs.length+'</span>'
+      +'</div>'
+      +'<div class="ach-section-list">';
+
+    catAchs.forEach(function(a, num){
+      shown[a.n]=true;
+      var idx=ACHS.indexOf(a);
+      var earned=idx>=0&&G.ach[idx];
+      h+='<div class="ach-row '+(earned?'ach-row-done':'ach-row-lock')+'">'
+        +'<div class="ach-row-num">'+(num+1)+'</div>'
+        +'<div class="ach-row-ico">'+(earned?a.e:'🔒')+'</div>'
+        +'<div class="ach-row-info">'
+        +'<div class="ach-row-name">'+a.n+'</div>'
+        +'<div class="ach-row-desc">'+a.c+'</div>'
+        +(a.reward&&a.reward.vk?'<div class="ach-row-reward">🎁 +'+fm(a.reward.vk)+' VK</div>':'')
+        +(a.reward&&a.reward.dia?'<div class="ach-row-reward">🎁 +'+a.reward.dia+' 💎</div>':'')
+        +'</div>'
+        +(earned?'<div class="ach-row-check">✓</div>':'')
+        +'</div>';
+    });
+
+    h+='</div></div>';
+  });
+
+  /* Catch any achievements not in any category */
+  var uncategorised=ACHS.filter(function(a){ return !shown[a.n]; });
+  if(uncategorised.length){
+    h+='<div class="ach-section">'
+      +'<div class="ach-section-hdr">'
+      +'<span class="ach-section-ico">🎖</span>'
+      +'<span class="ach-section-name">Other</span>'
+      +'</div>'
+      +'<div class="ach-section-list">';
+    uncategorised.forEach(function(a,num){
+      var idx=ACHS.indexOf(a);
+      var earned=idx>=0&&G.ach[idx];
+      h+='<div class="ach-row '+(earned?'ach-row-done':'ach-row-lock')+'">'
+        +'<div class="ach-row-num">'+(num+1)+'</div>'
+        +'<div class="ach-row-ico">'+(earned?a.e:'🔒')+'</div>'
+        +'<div class="ach-row-info">'
+        +'<div class="ach-row-name">'+a.n+'</div>'
+        +'<div class="ach-row-desc">'+a.c+'</div>'
+        +'</div>'
+        +(earned?'<div class="ach-row-check">✓</div>':'')
+        +'</div>';
+    });
+    h+='</div></div>';
+  }
+
+  el.innerHTML=h;
+}
+
+function toggleAchCat(){} /* no longer used but kept for safety */
+
+function renderAchFlat(el){
+  var h='';
+  ACHS.forEach(function(a,i){
+    var earned=G.ach[i];
+    h+='<div class="ach-row '+(earned?'ach-row-done':'ach-row-lock')+'">'
+      +'<div class="ach-row-num">'+(i+1)+'</div>'
+      +'<div class="ach-row-ico">'+(earned?a.e:'🔒')+'</div>'
+      +'<div class="ach-row-info">'
+      +'<div class="ach-row-name">'+a.n+'</div>'
+      +'<div class="ach-row-desc">'+a.c+'</div>'
+      +'</div>'
+      +(earned?'<div class="ach-row-check">✓</div>':'')
+      +'</div>';
+  });
+  el.innerHTML=h;
+}
+function checkAch(){
+  if(!ACHS||!G.ach) return;
+  var ch=false;
+  for(var i=0;i<ACHS.length;i++){
+    if(!G.ach[i]&&ACHS[i].f(G)){
+      G.ach[i]=true; ch=true;
+      var a=ACHS[i];
+      // Reward achievements
+      if(a.reward){
+        if(a.reward.vk){G.vk+=a.reward.vk;}
+        if(a.reward.dia){G.dia+=a.reward.dia;}
+      }
+      // Achievement notification banner
+      (function(ach,hasReward,rewardVk){
+        setTimeout(function(){
+          var ov=document.createElement('div');
+          ov.className='ach-notif';
+          ov.innerHTML='<div class="ach-notif-inner">'
+            +'<span style="font-size:1.5rem;">'+ach.e+'</span>'
+            +'<div style="flex:1">'
+            +'<div style="font-size:0.55rem;color:var(--gold);letter-spacing:1.5px;font-weight:700;">🏅 ACHIEVEMENT UNLOCKED</div>'
+            +'<div style="font-size:0.75rem;font-weight:700;margin-top:1px;">'+ach.n+'</div>'
+            +(hasReward?'<div style="font-size:0.6rem;color:var(--gold);">🎁 +'+fm(rewardVk)+' VK reward!</div>':'')
+            +'</div></div>';
+          document.body.appendChild(ov);
+          setTimeout(function(){ov.classList.add('ach-notif-out');setTimeout(function(){ov.remove();},500);},3800);
+        },300);
+      })(a, !!(a.reward&&a.reward.vk), a.reward?a.reward.vk:0);
+    }
+  }
+  if(ch){
+    sv();
+    renderAch();
+    var cnt=G.ach.filter(Boolean).length;
+    st('achBadge',cnt+'/'+ACHS.length);
+    st('achProg',cnt+'/'+ACHS.length);
+  }
+}
+
+function renderAch(){
+  var el=document.getElementById('achGrid');
+  if(!el) return;
+  var done=G.ach.filter(Boolean).length;
+  st('achBadge',done+'/'+ACHS.length);
+  st('achProg', done+'/'+ACHS.length);
+
+  if(typeof ACH_CATS==='undefined'){renderAchFlat(el);return;}
   if(!window._achOpen) window._achOpen={};
 
   var h='';
@@ -164,3 +300,4 @@ setInterval(function(){
     if(typeof updDaily==='function') updDaily();
   }catch(e){ console.warn('tick error:',e); }
 },5000);
+          
