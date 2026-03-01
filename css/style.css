@@ -128,7 +128,7 @@ h3{font-size:0.82rem;font-weight:600;color:var(--text);margin-bottom:6px;}
 .lvig{position:absolute;inset:0;z-index:1;background:radial-gradient(ellipse at center,transparent 30%,rgba(0,0,0,0.85) 100%);pointer-events:none;}
 .lglow{position:absolute;top:0;left:50%;transform:translateX(-50%);width:70%;height:55%;background:radial-gradient(ellipse at 50% 20%,rgba(180,130,40,0.18),transparent 70%);pointer-events:none;z-index:2;}
 .lglow2{position:absolute;bottom:-10%;left:50%;transform:translateX(-50%);width:60%;height:40%;background:radial-gradient(ellipse,rgba(100,60,10,0.12),transparent 70%);pointer-events:none;z-index:2;}
-.lwrap{position:relative;z-index:3;display:flex;flex-direction:column;align-items:center;width:100%;max-width:400px;padding:0 24px;box-sizing:border-box;}
+.lwrap{position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;width:100%;max-width:400px;padding:0 24px;box-sizing:border-box;}
 .ltitle-wrap{text-align:center;margin-bottom:24px;opacity:0;animation:ltitleIn 1.2s cubic-bezier(0.4,0,0.2,1) forwards;}
 @keyframes ltitleIn{from{opacity:0;transform:translateY(-20px);}to{opacity:1;transform:translateY(0);}}
 .ltitle{font-family:'Cinzel Decorative','Cinzel',serif;font-size:clamp(2rem,10vw,3.6rem);font-weight:900;color:#d4a843;letter-spacing:0.12em;line-height:1;text-shadow:0 0 40px rgba(212,168,67,0.4);}
@@ -150,7 +150,7 @@ h3{font-size:0.82rem;font-weight:600;color:var(--text);margin-bottom:6px;}
 .linp{width:100%;box-sizing:border-box;background:rgba(10,6,2,0.8);border:1px solid rgba(140,100,30,0.25);border-radius:10px;padding:13px 16px;font-family:'Cinzel',Georgia,serif;font-size:0.8rem;color:#c8a84b;outline:none;margin-bottom:12px;display:block;transition:border-color 0.3s;}
 .linp::placeholder{color:rgba(180,140,60,0.3);font-size:0.7rem;}
 .linp:focus{border-color:rgba(180,130,40,0.6);box-shadow:0 0 12px rgba(180,130,40,0.1);}
-.lbtn{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:14px;background:linear-gradient(135deg,rgba(160,110,20,0.3),rgba(100,70,10,0.2));border:1px solid rgba(160,110,20,0.5);border-radius:10px;font-family:'Cinzel',serif;font-size:0.75rem;font-weight:700;letter-spacing:0.25em;color:#c8a84b;cursor:pointer;position:relative;overflow:hidden;transition:all 0.3s;margin-top:4px;}
+.lbtn{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:14px;background:linear-gradient(135deg,rgba(160,110,20,0.3),rgba(100,70,10,0.2));border:1px solid rgba(160,110,20,0.5);border-radius:10px;font-family:'Cinzel',serif;font-size:0.75rem;font-weight:700;letter-spacing:0.25em;color:#c8a84b;cursor:pointer;position:relative;overflow:hidden;transition:all 0.3s;margin-top:4px;-webkit-tap-highlight-color:rgba(200,160,60,0.2);touch-action:manipulation;}
 .lbtn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(180,130,40,0.15),transparent);opacity:0;transition:opacity 0.3s;}
 .lbtn:hover{border-color:rgba(200,150,50,0.8);box-shadow:0 0 20px rgba(180,130,40,0.15);}
 .lbtn:hover::before{opacity:1;}
@@ -216,5 +216,4 @@ h3{font-size:0.82rem;font-weight:600;color:var(--text);margin-bottom:6px;}
 .sgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
 .shc{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);border-radius:16px;padding:14px 10px;text-align:center;cursor:pointer;transition:all 0.2s cubic-bezier(0.34,1.56,0.64,1);position:relative;overflow:hidden;}
 .shc::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent);}
-.shc:hover:not(.lk):not(.own){background:rgba(255,255,255,0.09);transform:translateY(-3px) scale(1.01);border-color:rgba(255,214,10,0.22);box-shadow:0 12px 28px rgba(0,0,0,0.5),0 0 20px rgba(255,214,10,0.06);}
-.shc:active:not(.lk):not(.own){transform:scale(0.96);}
+.shc:hover:not(.lk):not(.own){background:rgba(255,255,255,0.09);transform:translateY(-3px) scale(1.01);border-color:rgba(255,214,10,0.22);box-shadow:0 12px 28px rgba(0,0,0,0.5),0 0 20px rg
